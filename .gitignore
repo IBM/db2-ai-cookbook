@@ -1,0 +1,23 @@
+# Python virtual environments — multi-GB and machine-specific (absolute paths baked in)
+.venv/
+
+# Python caches / build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Runtime server logs
+server.log
+*.log
+
+# Infinity on-disk cache
+.infinity_cache/
+
+# Core dumps (e.g. from the AVX2 debugging)
+core
+core.*
+
+# OS / editor cruft
+.DS_Store

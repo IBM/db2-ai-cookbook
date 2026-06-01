@@ -1,0 +1,17 @@
+# Working dependency set for the Infinity + jina-clip-v2 image embedding service.
+# Verified on RHEL 9.6 (Plow), Python 3.12.13, CPU-only (torch engine).
+#
+# Install in THIS ORDER (the base package first, then the overrides):
+#     pip install -r requirements.txt
+#
+# Why the overrides: infinity-emb[all]==0.0.77 (latest) resolves against current
+# PyPI to dependency versions it is no longer compatible with. The four pins
+# below are the minimum needed to make it import and start. See README.md.
+
+infinity-emb[all]==0.0.77
+
+# --- compatibility overrides (must be listed AFTER infinity-emb above) ---
+optimum==1.27.0       # optimum>=2.0 removed optimum.bettertransformer, which infinity imports unconditionally
+transformers==4.48.3  # optimum.bettertransformer refuses to load on transformers>=4.49
+tokenizers==0.21.4    # required by transformers 4.48.x (needs tokenizers<0.22)
+click==8.1.8          # typer 0.12.5 raises "Secondary flag is not valid for non-boolean flag" on click>=8.2
