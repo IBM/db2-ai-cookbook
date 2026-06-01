@@ -60,6 +60,14 @@ sample.jpg  →  base64 encode  →  POST /v1/embeddings
                               [3072 floats] → print
 ```
 
+**Inside the `vLLM server` box.** If you've ever written `vector = model(image_tensor)` in PyTorch, you already know the middle step — vLLM's job is to wrap that one call in a long-running network service. The three lines map to:
+
+- **decode → tensor** — the request arrived as JSON with the image as a base64 string. The server decodes it back to image bytes and preprocesses them (resize, normalize) into the input tensor the model expects — the same prep you'd do before any PyTorch vision model.
+- **PyTorch forward** — the actual forward pass, `model(tensor)` → vector. This is the part you already know. vLLM keeps the model loaded in memory, so every request reuses it instead of reloading the weights.
+- **wrap as JSON** — turn the output tensor back into a plain list of floats and package it in the OpenAI-style JSON response, sent back over HTTP.
+
+So the box is just a wrapper around the single forward call you already understand: it adds HTTP in/out and the encode/decode at the edges, so one loaded model can serve many callers over the network instead of running once in a script.
+
 ## The API shape
 
 vLLM's image-embedding endpoint is a **superset** of OpenAI's spec. Same URL path (`/v1/embeddings`) and same response shape, but the request body uses `messages` (borrowed from OpenAI's vision Chat Completions API) instead of OpenAI's text-only `input` array.
