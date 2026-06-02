@@ -4,6 +4,13 @@ Turn an image into a 3072-dimensional embedding vector using a local [vLLM](http
 
 The sample is a JPEG, but any common image format works (PNG, WebP, …) — you set the format in the request, covered in [The API shape](#the-api-shape).
 
+```mermaid
+flowchart LR
+    IMG["image<br/>(JPEG / PNG / …)"] --> SVC["vLLM server<br/>running VLM2Vec-Full"]
+    SVC --> VEC["3072-dim<br/>embedding vector"]
+    VEC --> USE["similarity search<br/>clustering · dedup"]
+```
+
 > **Tested on:** Red Hat Enterprise Linux 9.6, Python 3.12, CPU-only (no GPU), vLLM 0.22.0. This host needed a from-source build of vLLM — see [why, and how to build it](#appendix--rebuilding-venv-from-scratch-on-this-host).
 
 ## New to image embeddings?
