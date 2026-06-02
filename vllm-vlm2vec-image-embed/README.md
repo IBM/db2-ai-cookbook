@@ -1,80 +1,145 @@
 # Image embeddings with vLLM (CPU)
 
-Send a JPEG to a local vLLM server, get back a 3072-dimensional vector that represents the image's meaning. Minimal, learning-focused, CPU-only.
+Turn an image into a 3072-dimensional embedding vector using a local [vLLM](https://docs.vllm.ai) server running the [`TIGER-Lab/VLM2Vec-Full`](https://huggingface.co/TIGER-Lab/VLM2Vec-Full) model. This module is a minimal, CPU-only **tutorial** — built to show the moving parts, not for production.
 
-> **Tested on:** Red Hat Enterprise Linux 9.6 (Plow), Python 3.12, CPU-only (AMD EPYC, AVX2, no GPU), vLLM 0.22.0 built from source. See the [Appendix](#appendix--rebuilding-venv-from-scratch-on-this-host) for why this host needed a source build.
+The sample is a JPEG, but any common image format works (PNG, WebP, …) — you set the format in the request, covered in [The API shape](#the-api-shape).
 
-## Quick start
+> **Tested on:** Red Hat Enterprise Linux 9.6, Python 3.12, CPU-only (no GPU), vLLM 0.22.0. This host needed a from-source build of vLLM — see [why, and how to build it](#appendix--rebuilding-venv-from-scratch-on-this-host).
+
+## New to image embeddings?
+
+If you've used **text** embeddings, this is the same idea with an image as the input. An embedding is a list of numbers (here, 3072 of them) that captures the *meaning* of the input, placing similar inputs close together in vector space. Swap "sentence" for "image" and what you already know carries over: measure similarity, cluster, deduplicate, or feed the vector to another model.
+
+Where image embeddings get used:
+
+- **Visual / reverse image search** — "find images like this one"
+- **Near-duplicate detection** — spot re-uploads or slight edits
+- **Recommendation and content grouping** — organize a photo or product library by what's in the images
+
+VLM2Vec places images **and** text in the same vector space, so you can also search images with a text query.
+
+> **Expect slowness on CPU.** The first request after the server starts takes ~2–3 minutes (one-time warmup); after that, each request is ~20–25 seconds. Production systems use GPUs — this runs on CPU so you can follow along on any machine.
+
+## Run it
+
+> **First time?** This assumes vLLM and the model are already installed in `.venv`. Starting from scratch? Do the [one-time setup](#appendix--rebuilding-venv-from-scratch-on-this-host) first — it installs vLLM and downloads the ~8 GB model from Hugging Face — then come back here.
+
+**1. Start the server.**
 
 ```bash
 cd vllm-vlm2vec-image-embed
 source .venv/bin/activate
-
-./serve.sh                              # starts vLLM, logs to server.log
-curl -s http://localhost:8000/health    # wait for 200 (~10 min on first run)
-
-python embed_image.py                   # send the image, print the vector
-./cleanup.sh                            # stop the server
+./serve.sh                 # launches vLLM in the background; logs go to server.log
 ```
 
-First start downloads ~8 GB of weights and JIT-compiles for CPU — expect ~10 minutes before it's ready.
+**2. Wait until it's ready.** `/health` returns `200` once the model is loaded (the first start loads and warms up the model, so give it a few minutes):
 
-## What you'll see
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8000/health
+```
+```
+200
+```
 
+**3. Embed the sample image.**
+
+```bash
+python embed_image.py
+```
 ```
 HTTP status: 200
 Embedding dimension: 3072
 First 10 values: [0.0065, 0.0142, 0.0245, 0.0220, 0.0177, ...]
 ```
 
-That vector is the same kind of object you know from text embeddings — usable for similarity search, clustering, or as input to a downstream model. The only new thing is that the "document" is an image.
+Those 3072 floats are the embedding for the image.
 
-The first request after startup takes ~2–3 minutes (one-time CPU warmup/compile); warm requests are ~20–25 seconds. Production uses GPUs for a reason.
+**4. Stop the server when done.**
+
+```bash
+./cleanup.sh
+```
 
 ## How it works
 
-Four layers from model to network:
+Four pieces cooperate to turn "an HTTP request with an image" into "an embedding." Knowing which is which is the key:
 
-| Layer | What it does |
-|---|---|
-| **VLM2Vec-Full** | Trained neural network. Maps pixels → 3072-dim vector. From TIGER-Lab, built on Phi-3.5-vision. |
-| **PyTorch (CPU)** | Math engine running the model's tensor operations on your CPU. |
-| **Transformers** | Loads the model architecture and weights from Hugging Face. |
-| **vLLM** | Wraps the model in an OpenAI-compatible HTTP server. Handles parsing, batching, lifecycle. |
+| Component | Role | What it is |
+|---|---|---|
+| **VLM2Vec-Full** | **the model** | The trained multimodal embedding model — the thing that converts an image (or text) into the 3072-dim vector. Open weights from [TIGER-Lab](https://huggingface.co/TIGER-Lab/VLM2Vec-Full), fine-tuned from Microsoft's Phi-3.5-vision. Everything else just loads, runs, or serves it. |
+| **Transformers** | model loader | Hugging Face library that loads the model's architecture and weights into memory. |
+| **PyTorch (CPU)** | runtime | The framework that executes the model's math (tensor operations), here on the CPU. |
+| **vLLM** | serving engine | Not a model — it wraps the loaded model in an HTTP server (via FastAPI + Uvicorn) and speaks the OpenAI API, handling requests, batching, and lifecycle. |
 
-The Python client (`embed_image.py`) just speaks REST — read image, build JSON, POST, parse response. Uses only `requests` and the standard library.
-
-### Request flow
+How they stack up, bottom to top:
 
 ```
-sample.jpg  →  base64 encode  →  POST /v1/embeddings
-                                        │
-                                        ▼
-                              ┌─── vLLM server ────┐
-                              │ decode → tensor    │
-                              │ PyTorch forward    │
-                              │ wrap as JSON       │
-                              └────────────────────┘
-                                        │
-                                        ▼
-                              [3072 floats] → print
+        HTTP client  (curl, or embed_image.py)
+                 │   OpenAI-style JSON over HTTP
+                 ▼
+ ┌───────────────────────────────────────────────┐
+ │ vLLM — serving engine                          │
+ │   FastAPI + Uvicorn  →  HTTP endpoints         │
+ │   request handling · batching · lifecycle      │
+ ├───────────────────────────────────────────────┤
+ │ VLM2Vec-Full — the embedding model             │
+ │   loaded by Transformers from Hugging Face     │
+ ├───────────────────────────────────────────────┤
+ │ PyTorch (CPU) — runs the model's math          │
+ ├───────────────────────────────────────────────┤
+ │ Python 3.12   ·   RHEL 9.6   (CPU host)        │
+ └───────────────────────────────────────────────┘
 ```
 
-**Inside the `vLLM server` box.** If you've ever written `vector = model(image_tensor)` in PyTorch, you already know the middle step — vLLM's job is to wrap that one call in a long-running network service. The three lines map to:
+Read it bottom-up: Python runs PyTorch, PyTorch runs the VLM2Vec-Full model, and vLLM wraps that model in a web server your client calls. The client (`embed_image.py`) stays simple — read image, build JSON, POST, parse response — using only `requests` and the standard library.
 
-- **decode → tensor** — the request arrived as JSON with the image as a base64 string. The server decodes it back to image bytes and preprocesses them (resize, normalize) into the input tensor the model expects — the same prep you'd do before any PyTorch vision model.
-- **PyTorch forward** — the actual forward pass, `model(tensor)` → vector. This is the part you already know. vLLM keeps the model loaded in memory, so every request reuses it instead of reloading the weights.
-- **wrap as JSON** — turn the output tensor back into a plain list of floats and package it in the OpenAI-style JSON response, sent back over HTTP.
+## What happens to one request
 
-So the box is just a wrapper around the single forward call you already understand: it adds HTTP in/out and the encode/decode at the edges, so one loaded model can serve many callers over the network instead of running once in a script.
+The input is `sample.jpg` — a cat in the snow:
+
+![sample.jpg — a cat in the snow](sample.jpg)
+
+At the top level, treat the server as a black box: an image goes in, a vector comes out.
+
+```
+              your image
+                  │  (base64 text, inside JSON)
+                  ▼
+        ┌────────────────────────┐
+        │   vLLM server           │
+        │   running VLM2Vec-Full  │
+        └────────────────────────┘
+                  │
+                  ▼
+         3072-dim embedding vector
+```
+
+Open the box and there are three steps. Watch how the data changes form at each one:
+
+```
+IN   "data:image/jpeg;base64,/9j/4gIcSUND..."   ← JSON (text)
+        │
+        ▼  1. decode + preprocess
+     image tensor   (the pixels, as numbers)
+        │
+        ▼  2. forward pass through VLM2Vec-Full
+     embedding tensor   (3072 numbers — the vector)
+        │
+        ▼  3. serialize
+OUT  { "embedding": [0.0065, 0.0142, ...] }      → JSON (text)
+```
+
+- **1 · decode + preprocess** — the image arrived as a base64 *string* inside JSON. The server decodes it back to image bytes, then resizes and normalizes the pixels into an **image tensor** — the same prep you'd do before any PyTorch vision model.
+- **2 · forward pass** — `vector = model(image_tensor)`, the part you already know from PyTorch. The tensor changes meaning here: the input was a grid of *pixels*; the output is the **embedding tensor**, a single list of 3072 numbers. They're two different tensors.
+- **3 · serialize** — turn that 3072-number tensor into a plain list of floats and wrap it in the JSON response sent back over HTTP.
+
+So the server is a wrapper around one familiar line — `model(image_tensor)` — with base64-decode on the way in and JSON on the way out.
 
 ## The API shape
 
-vLLM's image-embedding endpoint is a **superset** of OpenAI's spec. Same URL path (`/v1/embeddings`) and same response shape, but the request body uses `messages` (borrowed from OpenAI's vision Chat Completions API) instead of OpenAI's text-only `input` array.
+The endpoint is OpenAI-compatible, with one twist. OpenAI's *text* embeddings endpoint takes a plain `"input": [...]` array of strings — but OpenAI has **no** image-embeddings endpoint at all. So vLLM borrowed the `messages` format from OpenAI's *vision chat* API and reused it here: same URL (`/v1/embeddings`), same response shape, but the image rides inside a chat-style `messages` array.
 
-OpenAI doesn't actually offer image embeddings — there's no official standard. vLLM extended OpenAI's pattern by reusing the vision chat format.
-
-**Request:**
+**Request**
 
 ```json
 {
@@ -82,7 +147,7 @@ OpenAI doesn't actually offer image embeddings — there's no official standard.
   "messages": [{
     "role": "user",
     "content": [
-      {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,..."}},
+      {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,/9j/4gIc..."}},
       {"type": "text", "text": "Represent the given image."}
     ]
   }],
@@ -90,7 +155,16 @@ OpenAI doesn't actually offer image embeddings — there's no official standard.
 }
 ```
 
-**Response:**
+| Field | What it means |
+|---|---|
+| `model` | Which served model to use — must match what the server loaded. |
+| `messages` | **The vLLM extension.** A chat-style list (here one user message) whose `content` holds the things to embed. This replaces OpenAI's text-only `input` array. |
+| `content[].type: "image_url"` | Marks this content block as an image (the content type from OpenAI's vision API). |
+| `image_url.url` | The image itself, inlined as a `data:<mime>;base64,<…>` URL. The MIME type (`image/jpeg`, `image/png`, …) tells the server how to decode it — that's how formats other than JPEG work. |
+| `content[].type: "text"` | An instruction block. `"Represent the given image."` is VLM2Vec's prompt telling the model what to embed. |
+| `encoding_format` | `"float"` returns the vector as JSON numbers. (`"base64"` would pack it as a base64 string instead.) |
+
+**Response**
 
 ```json
 {
@@ -104,6 +178,15 @@ OpenAI doesn't actually offer image embeddings — there's no official standard.
   "usage": {...}
 }
 ```
+
+| Field | What it means |
+|---|---|
+| `object: "list"` | The response is a list of results. |
+| `data[]` | One entry per input you sent (here, one). |
+| `data[].embedding` | The vector — 3072 floats. This is what you store and compare. |
+| `data[].index` | Position matching the input order (useful when you send several at once). |
+| `model` | The model that produced the embeddings. |
+| `usage` | Token-count accounting for the request. |
 
 ## What's not here
 
