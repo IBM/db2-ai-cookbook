@@ -39,13 +39,20 @@ source .venv/bin/activate
 ./serve.sh                 # launches vLLM in the background; logs go to server.log
 ```
 
-**2. Wait until it's ready.** `/health` returns `200` once the model is loaded (the first start loads and warms up the model, so give it a few minutes):
+**2. Wait until it's ready — and watch the download.** On the **first** run, vLLM downloads the model (~8 GB) from Hugging Face, then loads and warms it up (several minutes). Watch progress live:
+
+```bash
+tail -f server.log     # download progress, then "Uvicorn running on http://0.0.0.0:8000" = ready (Ctrl-C to stop watching)
+```
+
+Or poll the health endpoint. It prints `000` while still downloading/loading, and `200` once the server is ready:
 
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8000/health
 ```
 ```
-200
+000   # still downloading / loading — keep waiting
+200   # ready
 ```
 
 **3. Embed the sample image.**
