@@ -2,6 +2,19 @@
 
 Self-hosted image and text embedding services for CPU-only RHEL hosts. Each subfolder is an independent module with its own inference engine, virtualenv, and README — pick one and follow its Quick start. `curl` is the only client required.
 
+```mermaid
+flowchart LR
+    IN["image / text"] --> SVC
+    subgraph SVC["self-hosted CPU embedding service"]
+      direction TB
+      M1["Infinity + jina-clip-v2<br/>1024-dim"]
+      M2["vLLM + VLM2Vec-Full<br/>3072-dim"]
+    end
+    SVC --> VEC["embedding vector"]
+    VEC --> STORE["vector store<br/>Db2 · FAISS"]
+    STORE --> USE["similarity search<br/>clustering · dedup"]
+```
+
 ## Modules
 
 | Module | Engine | Model | Dim | Image input | Port | Install |
