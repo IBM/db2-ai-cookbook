@@ -11,7 +11,7 @@ flowchart LR
     VEC --> USE["similarity search<br/>clustering · dedup"]
 ```
 
-> **Tested on:** Red Hat Enterprise Linux 9.6, Python 3.12, CPU-only (no GPU), vLLM 0.22.0. This host needed a from-source build of vLLM — see [why, and how to build it](#appendix--full-setup-from-scratch).
+> **Tested on:** Red Hat Enterprise Linux 9.6, Python 3.12, AMD EPYC-Genoa CPU (AVX-512, no AMX), no GPU, vLLM 0.22.0 built from source. See [why, and how to build it](#appendix--full-setup-from-scratch).
 
 ## New to image embeddings?
 
@@ -208,23 +208,19 @@ Deliberately omitted: GPU support, auth, TLS, client batching, error handling, r
 
 ## Appendix — Full setup from scratch
 
-Start here if `.venv` doesn't exist yet. This walks from a clean machine to a runnable module.
+Start here if `.venv` doesn't exist yet. These are the exact steps verified on this VM: **RHEL 9.6, Python 3.12, AMD EPYC-Genoa CPU (AVX-512, no AMX), no GPU.**
 
-> **Why a source build on this host?** Two issues on this RHEL 9.6 VM force it:
-> 1. **No prebuilt vLLM CPU wheel works here** — official wheels need glibc ≥ 2.35; RHEL 9.6 has 2.34.
-> 2. **vLLM's CPU kernels normally require AVX-512** — this AMD EPYC VM has only AVX2.
->
-> On a host with AVX-512 **and** glibc ≥ 2.35 (or the official `vllm-cpu` container), you skip the source build — see step 3, "Easy path."
+> **Why build vLLM from source?** Two host facts force it:
+> 1. **glibc 2.34** on RHEL 9.6 is too old for the prebuilt vLLM CPU wheels (they need ≥ 2.35), so vLLM is compiled locally.
+> 2. **Genoa has AVX-512 but no AMX**, so the build is pointed at plain AVX-512 — the default build's AMX kernels would crash with *Illegal instruction* on this CPU.
 
 ### Prerequisites
 
-A Linux x86_64 host with `sudo`, `git`, and `curl`, plus **Python 3.12** (vLLM 0.22 + torch 2.11 ship `cp312` builds). Check it, and install on RHEL/Fedora if missing:
+A Linux x86_64 host with `sudo`, `git`, and `curl`, plus **Python 3.12** (vLLM 0.22 + torch 2.11 ship `cp312` builds). Check it, installing on RHEL if missing:
 
 ```bash
 python3.12 --version || sudo dnf install -y python3.12
 ```
-
-(On other distros, install Python 3.12 with your package manager, or use `pyenv`.)
 
 ### 1. Clone the repo and enter this module
 
@@ -241,56 +237,65 @@ source .venv/bin/activate
 pip install -U pip
 ```
 
-### 3. Install vLLM
+### 3. Install the system build dependencies
 
-**Easy path — AVX-512 CPU and glibc ≥ 2.35.** A prebuilt wheel just works:
+vLLM's x86 CPU backend needs gcc ≥ 12.3 (RHEL ships it as gcc-toolset-13):
 
 ```bash
-pip install vllm --extra-index-url https://wheels.vllm.ai/cpu
+sudo dnf install -y python3.12-devel numactl-devel gcc-toolset-13
 ```
 
-**This host — AVX2-only CPU and/or glibc 2.34.** Build vLLM from source instead:
+### 4. Get the vLLM source and its CPU dependencies
 
 ```bash
-# 3a. System build deps (gcc ≥ 12.3 required for vLLM's x86 CPU backend)
-sudo dnf install -y python3.12-devel numactl-devel gcc-toolset-13
-
-# 3b. vLLM source + its CPU dependency set (pulls torch 2.11.0+cpu)
 git clone --depth 1 --branch v0.22.0 https://github.com/vllm-project/vllm.git /tmp/vllm-build
 cd /tmp/vllm-build
 pip install "cmake>=3.26" wheel packaging ninja setuptools-rust setuptools-scm jinja2
 pip install -r requirements/cpu.txt --extra-index-url https://download.pytorch.org/whl/cpu
 pip install "torchvision==0.26.0+cpu" "torchaudio==2.11.0+cpu" \
   --extra-index-url https://download.pytorch.org/whl/cpu
+```
 
-# 3c. AVX2-only patch — build _C from AVX2 sources instead of AVX-512+AMX.
-#     UNSUPPORTED; only because this CPU lacks AVX-512. Drops kernels (AVX-512/AMX,
-#     shared-mem TP, MoE, weight-only quant) a single-process dense embedding model doesn't use.
-sed -i 's#SOURCES ${VLLM_EXT_SRC_AVX512} ${VLLM_EXT_SRC_SGL}#SOURCES ${VLLM_EXT_SRC_AVX2}#' cmake/cpu_extension.cmake
-sed -i 's#COMPILE_FLAGS ${CXX_COMPILE_FLAGS_AVX512_AMX}#COMPILE_FLAGS ${CXX_COMPILE_FLAGS_AVX2}#' cmake/cpu_extension.cmake
+`requirements/cpu.txt` pulls `torch==2.11.0+cpu`.
+
+### 5. Patch the build for AVX-512 without AMX
+
+The default build compiles the importable `_C` module with AMX instructions, which Genoa lacks. Re-point `_C` at plain AVX-512 (vLLM's own `_C_AVX512` recipe):
+
+```bash
+sed -i 's#SOURCES ${VLLM_EXT_SRC_AVX512} ${VLLM_EXT_SRC_SGL}#SOURCES ${VLLM_EXT_SRC_AVX512}#' cmake/cpu_extension.cmake
+sed -i 's#COMPILE_FLAGS ${CXX_COMPILE_FLAGS_AVX512_AMX}#COMPILE_FLAGS ${CXX_COMPILE_FLAGS_AVX512}#' cmake/cpu_extension.cmake
 sed -i '/target_compile_definitions(_C PRIVATE "-DCPU_CAPABILITY_AMXBF16")/d' cmake/cpu_extension.cmake
+```
 
-# 3d. Compile (~15 min on 16 cores)
+### 6. Compile (~15 min on 16 cores)
+
+```bash
 source /opt/rh/gcc-toolset-13/enable
 export VLLM_TARGET_DEVICE=cpu CC=$(which gcc) CXX=$(which g++) CMAKE_BUILD_PARALLEL_LEVEL=$(nproc)
 pip install . --no-build-isolation
-
-# 3e. Verify the kernels load on this CPU (must NOT print "Illegal instruction")
-python3 -c "import vllm._C; print('vllm._C OK on AVX2')"
-
-cd ~/multimodal-embeddings/vllm-vlm2vec-image-embed   # back to the module
 ```
 
-Sanity checks (source build): `python3 -c "import torch; print(torch.__version__)"` → `2.11.0+cpu`; `python3 -c "from vllm.platforms import current_platform; print(current_platform.is_cpu())"` → `True`. `/tmp/vllm-build` can be deleted afterward.
+### 7. Verify the kernels load
 
-### 4. Install the client dependency
+Run this **from the module folder, not `/tmp/vllm-build`** — inside the build dir its `vllm/` source subfolder shadows the installed package and you'll get a misleading `ModuleNotFoundError`:
+
+```bash
+cd ~/multimodal-embeddings/vllm-vlm2vec-image-embed
+python3 -c "import vllm._C; print('vllm._C OK')"
+python3 -c "import torch; print(torch.__version__)"     # -> 2.11.0+cpu
+```
+
+`vllm._C OK` (no *Illegal instruction*) means the build runs on your CPU.
+
+### 8. Install the client dependency
 
 ```bash
 pip install requests
 ```
 
-The sample image `sample.jpg` already ships with the repo — no download needed. To embed your own image, drop any JPEG/PNG in as `sample.jpg`.
+`sample.jpg` ships with the repo. To embed your own image, drop any JPEG/PNG in as `sample.jpg`.
 
-### 5. Run it
+### 9. Run it
 
-The model (~8 GB) downloads from Hugging Face on the first `./serve.sh`. Then follow [Run it](#run-it) above to start the server and embed the image.
+The model (~8 GB) downloads from Hugging Face on the first `./serve.sh`. Then follow [Run it](#run-it) above to start the server and embed the image. `/tmp/vllm-build` can be deleted after the build.
