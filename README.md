@@ -1,6 +1,6 @@
-# multimodal-embeddings
+# db2-multimodal-embedding
 
-> Turn images (and text) into vectors with three interchangeable embedding services — two self-hosted on CPU, one managed on AWS — and store the results in a Db2 `VECTOR` column for SQL similarity search.
+> A hands-on tutorial for Db2 users: turn images (and text) into vectors with three interchangeable embedding services — two self-hosted on CPU, one managed on AWS — and store the results in a Db2 `VECTOR` column for SQL similarity search.
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Platform](https://img.shields.io/badge/host-CPU--only%20·%20RHEL%209.6-lightgrey)
