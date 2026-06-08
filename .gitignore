@@ -15,6 +15,11 @@ server.log
 # Infinity on-disk cache
 .infinity_cache/
 
+# Secrets — local env files (API keys, tokens). Commit .env.example instead.
+.env
+.env.*
+!.env.example
+
 # Core dumps (e.g. from the AVX2 debugging)
 core
 core.*

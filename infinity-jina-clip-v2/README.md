@@ -1,8 +1,24 @@
-# Image and text embeddings with Infinity (CPU)
+# Infinity + jina-clip-v2 (CPU)
 
-Send an image URL or text to a local Infinity server, get back a 1024-dimensional vector that represents its meaning. Minimal, containerless, CPU-only — `curl` is the only client.
+> Send an image **URL** (or text) to a local [Infinity](https://github.com/michaelfeil/infinity) server and get back a 1024-dim vector — the lightest, fastest local path in this repo. Containerless, CPU-only, `curl` is the only client.
 
-> **Tested on:** Red Hat Enterprise Linux 9.6 (Plow), kernel `5.14.0-570.62.1.el9_6`, Python 3.12.13, CPU-only (no GPU), Infinity `0.0.77` + `jinaai/jina-clip-v2`. RHEL 9.6 needs a one-time SQLite fix — see the [Appendix](#appendix--host-setup-rhel-96-and-troubleshooting).
+![Engine](https://img.shields.io/badge/engine-Infinity%20(torch%2C%20CPU)-purple)
+![Model](https://img.shields.io/badge/model-jinaai%2Fjina--clip--v2-orange)
+![Dim](https://img.shields.io/badge/dim-1024-blue)
+![Input](https://img.shields.io/badge/input-image%20URL-lightgrey)
+
+`jina-clip-v2` maps images **and** text into the same 1024-dim space, so you can compare an image to a text query directly.
+
+```mermaid
+flowchart LR
+    IN["image URL / text"] -->|POST /embeddings| SVC["Infinity server<br/>jina-clip-v2"]
+    SVC --> VEC["1024-d<br/>embedding vector"]
+    VEC --> USE["similarity search<br/>clustering · dedup"]
+```
+
+> **Tested on:** RHEL 9.6 (Plow), kernel `5.14.0-570.62.1.el9_6`, Python 3.12.13, CPU-only (no GPU), Infinity `0.0.77` + `jinaai/jina-clip-v2`. RHEL 9.6 needs a one-time SQLite fix — see the [Appendix](#appendix--host-setup-rhel-96-and-troubleshooting).
+
+> **Latency:** the first request after startup is slow (model warmup); warm requests are ~2.5 s each on CPU.
 
 ## Quick start
 
@@ -15,7 +31,7 @@ source .venv/bin/activate
 # start the server in the background (logs -> server.log)
 nohup infinity_emb v2 --model-id jinaai/jina-clip-v2 --port 7997 --engine torch > server.log 2>&1 &
 
-# wait until it's ready (first run downloads ~900 MB + runs a CPU warmup)
+# wait until ready (first run downloads ~900 MB + runs a CPU warmup — a few minutes)
 until [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:7997/health)" = "200" ]; do sleep 2; done; echo ready
 
 # embed an image straight from a URL — no base64, no local download
@@ -27,34 +43,18 @@ curl -s http://localhost:7997/embeddings \
 pkill -f infinity_emb   # stop the server when done
 ```
 
-First start downloads the model (~900 MB) and runs a CPU warmup benchmark — expect a few minutes before health returns 200. If it dies on startup, inspect `server.log`.
-
-## What you'll see
-
 ```json
 {
     "object": "list",
     "data": [
-        {
-            "object": "embedding",
-            "embedding": [
-                -0.0707126334309578,
-                0.028112050145864487,
-                -0.017097393050789833,
-                -0.005084470845758915,
-                -0.02880133129656315,
-                ...
-            ]
-        }
+        {"object": "embedding", "embedding": [-0.0707126334309578, 0.028112050145864487, -0.017097393050789833, ...]}
     ],
     "model": "jinaai/jina-clip-v2",
     "usage": {...}
 }
 ```
 
-A `data[0].embedding` array of **1024** floats. That vector is the same kind of object you know from text embeddings — usable for similarity search, clustering, or ranking. jina-clip-v2 maps images and text into the **same** 1024-dim space, so you can compare an image to text directly.
-
-> **Latency:** the first request after startup is slow (model warmup); warm requests are ~2.5 s each on CPU.
+A `data[0].embedding` array of **1024** floats — the same kind of object you know from text embeddings, usable for similarity search, clustering, or ranking. If the server dies on startup, inspect `server.log`.
 
 ## How it works
 
@@ -62,77 +62,53 @@ Four layers, from the model up to the network:
 
 | Layer | What it does |
 |---|---|
-| **jina-clip-v2** (Transformers + `trust_remote_code`) | The trained model: maps an image or text → 1024-dim vector. It ships its own model code on the Hugging Face Hub, so `trust_remote_code` downloads and runs that code (first start pulls a few `.py` files alongside the weights). |
+| **jina-clip-v2** (Transformers + `trust_remote_code`) | The trained model: image or text → 1024-dim vector. It ships its own model code on the Hub, so `trust_remote_code` downloads and runs that code (first start pulls a few `.py` files alongside the weights). |
 | **PyTorch (CPU)** | The math engine that runs the model's tensor operations on the CPU. |
-| **Infinity** (`infinity-emb`, torch engine) | The serving layer: holds the model in memory, **batches** concurrent requests, runs them, returns vectors. "torch engine" means run with plain PyTorch (vs. the ONNX backend) — the most compatible choice for a custom model. |
-| **FastAPI + Uvicorn** | The HTTP layer: FastAPI defines the `/embeddings` and `/health` routes; Uvicorn listens on the port. Infinity wires them up for you. |
+| **Infinity** (`infinity-emb`, torch engine) | The serving layer: holds the model in memory, **batches** concurrent requests, returns vectors. "torch engine" = plain PyTorch (vs. ONNX) — the most compatible choice for a custom model. |
+| **FastAPI + Uvicorn** | The HTTP layer: defines `/embeddings` and `/health`, listens on the port. |
 
-A request flows **down** the stack (HTTP → FastAPI → Infinity → PyTorch model); the vector flows back **up** to the caller.
-
-### Request flow
+A request flows **down** the stack (HTTP → FastAPI → Infinity → PyTorch model); the vector flows back **up**.
 
 ```
 image URL or text
-       │
-       ▼  POST /embeddings  (input[])
-┌────────────────────────────────────────┐
-│ Infinity server (localhost:7997)        │
-│  1 validate request (schema)            │
-│  2 fetch image from URL   (text skips)  │
-│  3 preprocess → tensor                  │
-│  4 CLIP encoder (PyTorch, CPU)          │
-│  5 pool + L2 normalize                  │
-│  6 wrap as OpenAI-compatible JSON       │
-└────────────────────────────────────────┘
-       │
+       │  POST /embeddings (input[])
        ▼
-data[].embedding  →  1024 floats (+ usage)
+┌──────────────────────────────────────────┐
+│ Infinity (localhost:7997)                 │
+│  1 validate → 2 fetch image from URL      │
+│  3 preprocess → 4 CLIP encode (CPU)       │
+│  5 L2-normalize → 6 OpenAI-style JSON     │
+└──────────────────────────────────────────┘
+       │
+       ▼  data[].embedding → 1024 floats
 ```
-
-The non-obvious parts:
 
 | Step | Detail |
 |---|---|
 | 2 · fetch | You send a *URL*, not bytes — **the server** downloads the image, so the server (not your machine) needs network access to it. Text inputs skip this step. |
-| 3 · preprocess | Images go through CLIP's image processor (resize, center-crop, normalize); text gets tokenized. Both land in the same 1024-dim space. |
-| 4 · encode | The expensive step, and the one request **batching** accelerates by grouping concurrent requests. |
+| 4 · encode | The expensive step, accelerated by request **batching** across concurrent calls. |
 | 5 · normalize | Vectors are L2-normalized, so **cosine similarity is just a dot product** — convenient for search/ranking. |
 
 ## The API shape
 
-Infinity's endpoint matches OpenAI's text-embeddings API: same path (`/embeddings`), same response shape (`data[].embedding`), so any OpenAI client or a plain `curl` works. The difference: each entry in `input` can be an **image URL** (or text, or a mix), not just text.
+Infinity's endpoint matches OpenAI's text-embeddings API: same path (`/embeddings`), same response shape (`data[].embedding`), so any OpenAI client or plain `curl` works. The difference: each `input` entry can be an **image URL** (or text, or a mix).
 
 **Request** — mix images and text in one call:
 
 ```json
 {
   "model": "jinaai/jina-clip-v2",
-  "input": [
-    "https://.../cat_snow.jpg",
-    "a photo of a cat in the snow"
-  ]
+  "input": ["https://.../cat_snow.jpg", "a photo of a cat in the snow"]
 }
 ```
 
-**Response** — one embedding per input, in order:
-
-```json
-{
-  "object": "list",
-  "data": [
-    {"object": "embedding", "embedding": [-0.0707, 0.0281, ...]},
-    {"object": "embedding", "embedding": [ 0.0123, -0.0456, ...]}
-  ],
-  "model": "jinaai/jina-clip-v2",
-  "usage": {...}
-}
-```
+**Response** — one embedding per input, in order, under `data[]`.
 
 ## What's not here
 
-Deliberately omitted: auth, TLS, client-side batching, error handling/retries, GPU support, and any vector storage. To go further:
+Deliberately omitted: auth, TLS, client-side batching, error handling/retries, GPU support, and **any vector storage**. To go further:
 
-- Store the vectors in a vector store such as Db2, or a library like FAISS, for search
+- Persist the vectors — e.g. a Db2 `VECTOR` column (as the [vLLM](../vllm-vlm2vec-image-embed/README.md) and [Bedrock](../bedrock-titan-image-embed/README.md) modules do) or a library like FAISS
 - Embed a text query and rank images against it (shared space)
 - Move to a GPU host for lower latency
 
@@ -163,7 +139,7 @@ sudo dnf update -y sqlite-libs        # 3.34.1-9.el9_7 -> 3.34.1-10.el9_8
 python3 -c "import sqlite3; print('sqlite3 OK', sqlite3.sqlite_version)"
 ```
 
-If `dnf update` reports nothing to do, check whether an old SQLite is being injected via `LD_LIBRARY_PATH` (e.g. a DB2 `sqllib/lib64`) ahead of `/lib64`.
+If `dnf update` reports nothing to do, check whether an old SQLite is being injected via `LD_LIBRARY_PATH` (e.g. a Db2 `sqllib/lib64`) ahead of `/lib64`.
 
 ### Build the venv from scratch
 

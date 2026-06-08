@@ -1,157 +1,75 @@
-# Image embeddings with vLLM (CPU)
+# vLLM VLM2Vec → Db2 vector store
 
-Turn an image into a 3072-dimensional embedding vector using a local [vLLM](https://docs.vllm.ai) server running the [`TIGER-Lab/VLM2Vec-Full`](https://huggingface.co/TIGER-Lab/VLM2Vec-Full) model. This module is a minimal, CPU-only **tutorial** — built to show the moving parts, not for production.
+> Embed an image with **VLM2Vec-Full** on a local, CPU-only [vLLM](https://docs.vllm.ai) server, then store the image and its 3072-dim vector in a Db2 `VECTOR` column — ready for SQL similarity search.
 
-The sample is a JPEG, but any common image format works (PNG, WebP, …) — you set the format in the request, covered in [The API shape](#the-api-shape).
+![Engine](https://img.shields.io/badge/engine-vLLM%200.22%20(CPU)-76b900)
+![Model](https://img.shields.io/badge/model-VLM2Vec--Full-orange)
+![Dim](https://img.shields.io/badge/dim-3072-blue)
+![Store](https://img.shields.io/badge/store-Db2%20VECTOR-054ada)
+
+A minimal, CPU-only **tutorial** that shows the full stack — from a from-source vLLM build, through an OpenAI-compatible embedding call, to a native Db2 vector row. The client is ~50 lines in [`embed_image.py`](embed_image.py).
 
 ```mermaid
 flowchart LR
-    IMG["image<br/>(JPEG / PNG / …)"] --> SVC["vLLM server<br/>running VLM2Vec-Full"]
-    SVC --> VEC["3072-dim<br/>embedding vector"]
-    VEC --> USE["similarity search<br/>clustering · dedup"]
+    IMG["sample.jpg"] -->|base64 data URL| SVC["vLLM server<br/>VLM2Vec-Full"]
+    SVC -->|3072-d vector| APP["embed_image.py"]
+    IMG -.raw bytes.-> APP
+    APP -->|"BLOB + VECTOR"| DB[("Db2 SAMPLE<br/>image_embeddings_vlm2vec")]
+    DB --> Q["VECTOR_DISTANCE"]
 ```
 
-> **Tested on:** Red Hat Enterprise Linux 9.6, Python 3.12, AMD EPYC-Genoa CPU (AVX-512, no AMX), no GPU, vLLM 0.22.0 built from source. See [why, and how to build it](#appendix--full-setup-from-scratch).
+> **Tested on:** RHEL 9.6 · Python 3.12 · AMD EPYC-Genoa CPU (AVX-512, no AMX) · no GPU · vLLM 0.22.0 built from source · Db2 **12.1.5** (the `VECTOR` type needs Db2 **≥ 12.1.2**) with the `SAMPLE` database. See [why a source build, and how](#appendix--full-setup-from-scratch).
 
-## New to image embeddings?
-
-If you've used **text** embeddings, this is the same idea with an image as the input. An embedding is a list of numbers (here, 3072 of them) that captures the *meaning* of the input, placing similar inputs close together in vector space. Swap "sentence" for "image" and what you already know carries over: measure similarity, cluster, deduplicate, or feed the vector to another model.
-
-Where image embeddings get used:
-
-- **Visual / reverse image search** — "find images like this one"
-- **Near-duplicate detection** — spot re-uploads or slight edits
-- **Recommendation and content grouping** — organize a photo or product library by what's in the images
-
-VLM2Vec places images **and** text in the same vector space, so you can also search images with a text query.
-
-> **Expect slowness on CPU.** The first request after the server starts takes ~2–3 minutes (one-time warmup); after that, each request is ~20–25 seconds. Production systems use GPUs — this runs on CPU so you can follow along on any machine.
+> **Expect slowness on CPU.** The first request after startup takes ~2–3 minutes (one-time warmup); warm requests are ~20–25 s. Production uses GPUs — this runs on CPU so you can follow along anywhere.
 
 ## Run it
 
-> **First time?** This assumes vLLM and the model are already installed in `.venv`. Starting from scratch? Do the [one-time setup](#appendix--full-setup-from-scratch) first — it installs vLLM and downloads the ~8 GB model from Hugging Face — then come back here.
-
-**1. Start the server.**
+> **First time?** This assumes vLLM and the model are already in `.venv`. Starting from scratch? Do the [one-time setup](#appendix--full-setup-from-scratch) first (it builds vLLM and downloads the ~8 GB model), then return here.
 
 ```bash
 cd vllm-vlm2vec-image-embed
 source .venv/bin/activate
-./serve.sh                 # launches vLLM in the background; logs go to server.log
-```
+./serve.sh                 # launches vLLM in the background; logs -> server.log
 
-**2. Wait until it's ready — and watch the download.** On the **first** run, vLLM downloads the model (~8 GB) from Hugging Face, then loads and warms it up (several minutes). Watch progress live:
+# wait until ready (first run downloads ~8 GB + warms up — several minutes)
+until [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8000/health)" = "200" ]; do sleep 5; done; echo ready
 
-```bash
-tail -f server.log     # download progress, then "Uvicorn running on http://0.0.0.0:8000" = ready (Ctrl-C to stop watching)
-```
-
-Or poll the health endpoint. It prints `000` while still downloading/loading, and `200` once the server is ready:
-
-```bash
-curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8000/health
-```
-```
-000   # still downloading / loading — keep waiting
-200   # ready
-```
-
-**3. Embed the sample image.**
-
-```bash
 python embed_image.py
+./cleanup.sh               # stop the server when done
 ```
+
 ```
 HTTP status: 200
 Embedding dimension: 3072
-First 10 values: [0.0065, 0.0142, 0.0245, 0.0220, 0.0177, ...]
+First 10 values: [0.0062263123691082, 0.014218954369425774, 0.024728616699576378, 0.02260902151465416, ...]
+Stored sample.jpg + embedding in SAMPLE.image_embeddings_vlm2vec
 ```
 
-Those 3072 floats are the embedding for the image.
+Those 3072 floats are the embedding; the script then writes the image and vector to Db2 — see [Storing the result in Db2](#storing-the-result-in-db2).
 
-**4. Stop the server when done.**
-
-```bash
-./cleanup.sh
-```
+> **Prerequisites:** a built `.venv` with vLLM + the model ([appendix](#appendix--full-setup-from-scratch)), and a Db2 ≥ 12.1.2 instance with `SAMPLE` — local or [remote](#running-remotely).
 
 ## How it works
 
-Four pieces cooperate to turn "an HTTP request with an image" into "an embedding." Knowing which is which is the key:
+Four pieces turn "an HTTP request with an image" into "a stored embedding":
 
 | Component | Role | What it is |
 |---|---|---|
-| **VLM2Vec-Full** | **the model** | The trained multimodal embedding model — the thing that converts an image (or text) into the 3072-dim vector. Open weights from [TIGER-Lab](https://huggingface.co/TIGER-Lab/VLM2Vec-Full), fine-tuned from Microsoft's Phi-3.5-vision. Everything else just loads, runs, or serves it. |
-| **Transformers** | model loader | Hugging Face library that loads the model's architecture and weights into memory. |
-| **PyTorch (CPU)** | runtime | The framework that executes the model's math (tensor operations), here on the CPU. |
-| **vLLM** | serving engine | Not a model — it wraps the loaded model in an HTTP server (via FastAPI + Uvicorn) and speaks the OpenAI API, handling requests, batching, and lifecycle. |
-
-How they stack up, bottom to top:
+| **VLM2Vec-Full** | the model | The trained multimodal embedding model. Open weights from [TIGER-Lab](https://huggingface.co/TIGER-Lab/VLM2Vec-Full), fine-tuned from Microsoft's Phi-3.5-vision. |
+| **Transformers** | model loader | Loads the architecture + weights into memory. |
+| **PyTorch (CPU)** | runtime | Executes the model's tensor math, here on CPU. |
+| **vLLM** | serving engine | Wraps the model in an OpenAI-compatible HTTP server (FastAPI + Uvicorn) — request handling, batching, lifecycle. |
 
 ```
-        HTTP client  (curl, or embed_image.py)
-                 │   OpenAI-style JSON over HTTP
-                 ▼
- ┌───────────────────────────────────────────────┐
- │ vLLM — serving engine                          │
- │   FastAPI + Uvicorn  →  HTTP endpoints         │
- │   request handling · batching · lifecycle      │
- ├───────────────────────────────────────────────┤
- │ VLM2Vec-Full — the embedding model             │
- │   loaded by Transformers from Hugging Face     │
- ├───────────────────────────────────────────────┤
- │ PyTorch (CPU) — runs the model's math          │
- ├───────────────────────────────────────────────┤
- │ Python 3.12   ·   RHEL 9.6   (CPU host)        │
- └───────────────────────────────────────────────┘
+HTTP client (embed_image.py)  →  vLLM (FastAPI/Uvicorn)  →  VLM2Vec-Full  →  PyTorch (CPU)
+        OpenAI-style JSON              serving engine          the model        the math
 ```
 
-Read it bottom-up: Python runs PyTorch, PyTorch runs the VLM2Vec-Full model, and vLLM wraps that model in a web server your client calls. The client (`embed_image.py`) stays simple — read image, build JSON, POST, parse response — using only `requests` and the standard library.
-
-## What happens to one request
-
-The input is `sample.jpg` — a cat in the snow:
-
-![sample.jpg — a cat in the snow](sample.jpg)
-
-At the top level, treat the server as a black box: an image goes in, a vector comes out.
-
-```
-              your image
-                  │  (base64 text, inside JSON)
-                  ▼
-        ┌────────────────────────┐
-        │   vLLM server           │
-        │   running VLM2Vec-Full  │
-        └────────────────────────┘
-                  │
-                  ▼
-         3072-dim embedding vector
-```
-
-Open the box and there are three steps. Watch how the data changes form at each one:
-
-```
-IN   "data:image/jpeg;base64,/9j/4gIcSUND..."   ← JSON (text)
-        │
-        ▼  1. decode + preprocess
-     image tensor   (the pixels, as numbers)
-        │
-        ▼  2. forward pass through VLM2Vec-Full
-     embedding tensor   (3072 numbers — the vector)
-        │
-        ▼  3. serialize
-OUT  { "embedding": [0.0065, 0.0142, ...] }      → JSON (text)
-```
-
-- **1 · decode + preprocess** — the image arrived as a base64 *string* inside JSON. The server decodes it back to image bytes, then resizes and normalizes the pixels into an **image tensor** — the same prep you'd do before any PyTorch vision model.
-- **2 · forward pass** — `vector = model(image_tensor)`, the part you already know from PyTorch. The tensor changes meaning here: the input was a grid of *pixels*; the output is the **embedding tensor**, a single list of 3072 numbers. They're two different tensors.
-- **3 · serialize** — turn that 3072-number tensor into a plain list of floats and wrap it in the JSON response sent back over HTTP.
-
-So the server is a wrapper around one familiar line — `model(image_tensor)` — with base64-decode on the way in and JSON on the way out.
+The client stays simple — read image, build JSON, POST, parse, store — using `requests`, `ibm_db`, and the standard library.
 
 ## The API shape
 
-The endpoint is OpenAI-compatible, with one twist. OpenAI's *text* embeddings endpoint takes a plain `"input": [...]` array of strings — but OpenAI has **no** image-embeddings endpoint at all. So vLLM borrowed the `messages` format from OpenAI's *vision chat* API and reused it here: same URL (`/v1/embeddings`), same response shape, but the image rides inside a chat-style `messages` array.
+The endpoint is OpenAI-compatible with one twist: OpenAI has **no** image-embeddings endpoint, so vLLM borrowed the `messages` format from OpenAI's *vision chat* API and reused it at `/v1/embeddings`.
 
 **Request**
 
@@ -171,44 +89,77 @@ The endpoint is OpenAI-compatible, with one twist. OpenAI's *text* embeddings en
 
 | Field | What it means |
 |---|---|
-| `model` | Which served model to use — must match what the server loaded. |
-| `messages` | **The vLLM extension.** A chat-style list (here one user message) whose `content` holds the things to embed. This replaces OpenAI's text-only `input` array. |
-| `content[].type: "image_url"` | Marks this content block as an image (the content type from OpenAI's vision API). |
-| `image_url.url` | The image itself, inlined as a `data:<mime>;base64,<…>` URL. The MIME type (`image/jpeg`, `image/png`, …) tells the server how to decode it — that's how formats other than JPEG work. |
-| `content[].type: "text"` | An instruction block. `"Represent the given image."` is VLM2Vec's prompt telling the model what to embed. |
-| `encoding_format` | `"float"` returns the vector as JSON numbers. (`"base64"` would pack it as a base64 string instead.) |
+| `messages` | **The vLLM extension** — a chat-style list whose `content` holds the things to embed, replacing OpenAI's text-only `input`. |
+| `image_url.url` | The image, inlined as a `data:<mime>;base64,…` URL. The MIME type tells the server how to decode it (that's how non-JPEG formats work). |
+| `text` | VLM2Vec's instruction prompt, `"Represent the given image."` |
+| `encoding_format` | `"float"` returns the vector as JSON numbers. |
 
-**Response**
+**Response** — `data[0].embedding` holds the 3072 floats:
 
 ```json
-{
-  "object": "list",
-  "data": [{
-    "object": "embedding",
-    "index": 0,
-    "embedding": [0.00653, 0.01422, 0.02455, ...]
-  }],
-  "model": "TIGER-Lab/VLM2Vec-Full",
-  "usage": {...}
-}
+{ "object": "list",
+  "data": [{"object": "embedding", "index": 0, "embedding": [0.0062, 0.0142, ...]}],
+  "model": "TIGER-Lab/VLM2Vec-Full", "usage": {…} }
 ```
 
-| Field | What it means |
-|---|---|
-| `object: "list"` | The response is a list of results. |
-| `data[]` | One entry per input you sent (here, one). |
-| `data[].embedding` | The vector — 3072 floats. This is what you store and compare. |
-| `data[].index` | Position matching the input order (useful when you send several at once). |
-| `model` | The model that produced the embeddings. |
-| `usage` | Token-count accounting for the request. |
+## Storing the result in Db2
+
+After printing the vector, the script persists the **image** (`BLOB`) and its **embedding** (native Db2 `VECTOR`) in one row. VLM2Vec is 3072-dim, so this module uses its **own table**, separate from the [Bedrock module's](../bedrock-titan-image-embed/README.md) 1024-dim `image_embeddings` (a `VECTOR` column is fixed-width — the two can't share a table).
+
+```sql
+CREATE TABLE IF NOT EXISTS image_embeddings_vlm2vec (
+    id        INTEGER GENERATED ALWAYS AS IDENTITY,
+    filename  VARCHAR(255),
+    image     BLOB(1M),
+    embedding VECTOR(3072, FLOAT32)
+);
+
+INSERT INTO image_embeddings_vlm2vec (filename, image, embedding)
+VALUES (?, ?, VECTOR(CAST(? AS CLOB(1M)), 3072, FLOAT32));
+```
+
+> **Why `CAST(? AS CLOB(1M))`:** a 3072-float JSON string is ~40 KB, which overflows Db2's ~32 KB `VARCHAR` limit. Casting to a `CLOB` lets the full vector through. (The Bedrock module's 1024-dim vector is ~13 KB, fits a plain `VARCHAR`, and skips the cast.)
+
+Nearest images to row `1` by cosine distance (0 = identical):
+
+```sql
+SELECT filename,
+       VECTOR_DISTANCE(embedding, (SELECT embedding FROM image_embeddings_vlm2vec WHERE id = 1), COSINE) AS distance
+FROM image_embeddings_vlm2vec
+ORDER BY distance
+FETCH FIRST 5 ROWS ONLY;
+```
+
+### Running remotely
+
+The vLLM server and Db2 don't have to live on the same machine as the script — everything is read from `.env` (copy `.env.example`):
+
+```ini
+# If the vLLM server is on another host:
+VLLM_URL=http://vllm-host:8000/v1/embeddings
+
+# If Db2 is on another host (presence of DB2_HOSTNAME switches to a remote TCP connection):
+DB2_HOSTNAME=db2host.example.com
+DB2_PORT=50000            # Db2 SVCENAME port (default 50000)
+DB2_UID=db2inst1
+DB2_PWD=your-db2-password
+```
+
+Both default to `localhost` / local-trusted, so on the Db2 host you can skip `.env` entirely. On the Db2 server, confirm TCP/IP: `db2set DB2COMM` should include `TCPIP`. With `AUTHENTICATION=SERVER` (the default), `DB2_UID`/`DB2_PWD` are the **OS credentials** on the Db2 box.
+
+## Design notes
+
+- **CLOB cast for the vector** — required at 3072-dim (see above); the Bedrock module doesn't need it at 1024-dim.
+- **BLOB bound as `SQL_BLOB`** — a JPEG has null bytes; a plain-string bind would truncate it. Stored length matches the file byte-for-byte.
+- **`.env`-driven connection + URL** — one code path runs locally or remotely, chosen at runtime by `DB2_HOSTNAME` / `VLLM_URL`.
+- **Image read once, reused** — base64 for the server, raw bytes for the BLOB. Re-running **appends** a row (no dedupe).
 
 ## What's not here
 
-Deliberately omitted: GPU support, auth, TLS, client batching, error handling, retries, vector storage. To go further:
+Deliberately omitted: GPU support, auth, TLS, client batching, error handling, retries, upsert/dedupe, an ANN index. To go further:
 
-- Store vectors in a vector store such as Db2, or a library like FAISS, for search
-- Batch multiple images per request
-- Embed text queries with the same model and compare against images (shared space)
+- Loop over a folder of images, or add a text-query path and rank images against it (shared space)
+- Add a vector index for scale, and batch multiple images per request
 - Move to a GPU host for usable latency
 
 ---
@@ -295,11 +246,13 @@ python3 -c "import torch; print(torch.__version__)"     # -> 2.11.0+cpu
 
 `vllm._C OK` (no *Illegal instruction*) means the build runs on your CPU.
 
-### 8. Install the client dependency
+### 8. Install the client dependencies
 
 ```bash
-pip install requests
+pip install requests ibm_db python-dotenv
 ```
+
+`requests` calls the vLLM server; `ibm_db` writes the result to Db2; `python-dotenv` loads the server URL and Db2 settings from `.env`. Db2 storage also needs a **Db2 ≥ 12.1.2 instance with the `SAMPLE` database** (the `VECTOR` type lands in 12.1.2) — run on the Db2 host as the instance owner, or [remotely](#running-remotely) with Db2 credentials in `.env`. See [Storing the result in Db2](#storing-the-result-in-db2).
 
 `sample.jpg` ships with the repo. To embed your own image, drop any JPEG/PNG in as `sample.jpg`.
 
