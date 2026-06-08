@@ -83,7 +83,7 @@ If `dnf update` reports nothing to do, check whether an old SQLite is being inje
 ## Repository layout
 
 ```
-multimodal-embeddings/
+db2-multimodal-embedding/
 ├── infinity-jina-clip-v2/        # Infinity + jina-clip-v2 (1024-d, CPU, URL input)
 ├── vllm-vlm2vec-image-embed/     # vLLM + VLM2Vec-Full (3072-d, CPU) → Db2
 ├── bedrock-titan-image-embed/    # AWS Bedrock Titan (1024-d, managed) → Db2

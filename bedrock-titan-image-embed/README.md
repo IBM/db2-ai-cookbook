@@ -170,8 +170,8 @@ Deliberately omitted to stay minimal: error handling/retries, request batching, 
 
 ```bash
 # 1. Get the code
-git clone https://github.com/shaikhq/multimodal-embeddings.git
-cd multimodal-embeddings/bedrock-titan-image-embed
+git clone https://github.com/IBM/db2-multimodal-embedding.git
+cd db2-multimodal-embedding/bedrock-titan-image-embed
 
 # 2. Install the client (no model download, no compiler, no server)
 python3.12 -m venv .venv && source .venv/bin/activate

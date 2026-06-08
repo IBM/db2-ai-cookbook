@@ -183,8 +183,8 @@ python3.12 --version || sudo dnf install -y python3.12
 ### 1. Clone the repo and enter this module
 
 ```bash
-git clone https://github.com/shaikhq/multimodal-embeddings.git
-cd multimodal-embeddings/vllm-vlm2vec-image-embed
+git clone https://github.com/IBM/db2-multimodal-embedding.git
+cd db2-multimodal-embedding/vllm-vlm2vec-image-embed
 ```
 
 ### 2. Create the module's virtualenv
@@ -239,7 +239,7 @@ pip install . --no-build-isolation
 Run this **from the module folder, not `/tmp/vllm-build`** — inside the build dir its `vllm/` source subfolder shadows the installed package and you'll get a misleading `ModuleNotFoundError`:
 
 ```bash
-cd ~/multimodal-embeddings/vllm-vlm2vec-image-embed
+cd ~/db2-multimodal-embedding/vllm-vlm2vec-image-embed
 python3 -c "import vllm._C; print('vllm._C OK')"
 python3 -c "import torch; print(torch.__version__)"     # -> 2.11.0+cpu
 ```

@@ -144,7 +144,7 @@ If `dnf update` reports nothing to do, check whether an old SQLite is being inje
 ### Build the venv from scratch
 
 ```bash
-mkdir -p ~/multimodal-embeddings/infinity-jina-clip-v2 && cd ~/multimodal-embeddings/infinity-jina-clip-v2
+mkdir -p ~/db2-multimodal-embedding/infinity-jina-clip-v2 && cd ~/db2-multimodal-embedding/infinity-jina-clip-v2
 python3 -m venv .venv && source .venv/bin/activate
 pip install -U pip
 pip install -r requirements.txt
