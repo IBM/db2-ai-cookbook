@@ -131,8 +131,8 @@ for x, c, (draw, t, s1, s2, col), step in zip(XS, CENTERS, specs, (1, 2, 3)):
 # ---- arrows + plain-language labels -----------------------------------------
 # Top line = the action; bottom line = what it means, for first-timers.
 edge_labels = [
-    ("send the image", "(uploaded to the cloud)"),
-    ("get the embedding back", "a list of 1,024 numbers"),
+    ("REST API call", "(sends the image)"),
+    ("get the embedding", "store it in Db2"),
 ]
 for i in range(2):
     x0 = XS[i] + CARD_W + 0.06
