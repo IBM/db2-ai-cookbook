@@ -9,7 +9,7 @@
 
 This is a minimal, end-to-end **tutorial**: managed inference wired straight into a SQL database that understands vectors. The whole client is ~40 lines in [`embed_image.py`](embed_image.py).
 
-![Workflow: an image is sent as base64 to AWS Bedrock (Titan Multimodal G1), which returns a 1024-d vector; the image (BLOB) and vector (VECTOR(1024)) are stored in one IBM Db2 row and searched with VECTOR_DISTANCE cosine](docs/workflow_linkedin.png)
+![Workflow: (1) your image is sent to AWS Bedrock, (2) the Titan Multimodal model turns it into an embedding — a list of 1,024 numbers, (3) the image and its vector are stored together in one IBM Db2 row](docs/workflow_linkedin.png)
 
 <sub>Diagram source: [`docs/make_workflow_image.py`](docs/make_workflow_image.py) → regenerate with `python3 docs/make_workflow_image.py`. The PNG is 2400×1350 (16:9), sized for sharing on LinkedIn.</sub>
 

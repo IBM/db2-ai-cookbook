@@ -1,10 +1,14 @@
 """Render the Bedrock -> Db2 workflow as a LinkedIn-optimized PNG.
 
-Standalone (no module deps): uses matplotlib only. Produces a 16:9 landscape
-image at retina resolution (2400x1350) that reads well in the LinkedIn feed.
+Mirrors what embed_image.py actually does: read an image, get its embedding
+from AWS Bedrock (Titan Multimodal), and store the image + the embedding in
+IBM Db2. No similarity search happens in the script, so the diagram stops at
+"stored in Db2". Written for people new to image embeddings.
 
-    python3 docs/make_workflow_image.py
-    # -> docs/workflow_linkedin.png
+Standalone (matplotlib only). Produces a 16:9 image at retina resolution
+(2400x1350) that reads well in the LinkedIn feed.
+
+    python3 docs/make_workflow_image.py     # -> docs/workflow_linkedin.png
 """
 
 import matplotlib
@@ -19,11 +23,10 @@ SUB = "#5a6b7b"        # muted subtitle
 CANVAS = "#f4f7fb"     # page background
 CARD = "#ffffff"
 EDGE = "#dbe3ec"
-ARROW = "#94a3b4"
-IMG_C = "#1f9e8f"      # teal  (image)
+ARROW = "#7c8b9a"      # muted slate for arrows
+IMG_C = "#1f9e8f"      # teal   (image)
 AWS_C = "#ff9900"      # AWS orange
 DB2_C = "#0f62fe"      # IBM Carbon blue
-OUT_C = "#24a148"      # IBM Carbon green
 
 W, H = 12.0, 6.75      # inches; at dpi=200 -> 2400x1350 px (16:9)
 fig = plt.figure(figsize=(W, H), dpi=200)
@@ -35,31 +38,36 @@ fig.patch.set_facecolor(CANVAS)
 ax.add_patch(Rectangle((0, 0), W, H, color=CANVAS, zorder=0))
 
 # ---- header -----------------------------------------------------------------
-ax.text(W / 2, 6.18, "Multimodal Image Search with AWS Bedrock + IBM Db2",
-        ha="center", va="center", fontsize=23, fontweight="bold", color=INK)
-ax.text(W / 2, 5.62, "Embed an image, store it next to its vector, search with one line of SQL.",
-        ha="center", va="center", fontsize=13.5, color=SUB)
+ax.text(W / 2, 6.20, "Turn an Image into a Vector and Store It in IBM Db2",
+        ha="center", va="center", fontsize=22.5, fontweight="bold", color=INK)
+ax.text(W / 2, 5.62, "Three steps: take a picture, turn it into numbers with AWS Bedrock, and save both in Db2.",
+        ha="center", va="center", fontsize=13, color=SUB)
 
-# ---- card layout ------------------------------------------------------------
-CARD_W, CARD_H = 2.42, 2.55
-CY = 2.55                      # bottom y of cards
-GAP = (W - 1.0 - 4 * CARD_W) / 3.0
-XS = [0.5 + i * (CARD_W + GAP) for i in range(4)]
+# ---- card layout (3 cards) --------------------------------------------------
+CARD_W, CARD_H = 2.95, 2.70
+CY = 2.30                       # bottom y of cards
+GAP = (W - 1.0 - 3 * CARD_W) / 2.0
+XS = [0.5 + i * (CARD_W + GAP) for i in range(3)]
 CENTERS = [x + CARD_W / 2 for x in XS]
-ICON_CY = CY + CARD_H - 0.72   # icon center y
-TITLE_Y = CY + 0.92
-SUB1_Y = CY + 0.56
+ICON_CY = CY + CARD_H - 0.80
+TITLE_Y = CY + 0.96
+SUB1_Y = CY + 0.58
 SUB2_Y = CY + 0.28
 
 
-def card(x, accent):
+def card(x, accent, step):
     ax.add_patch(FancyBboxPatch((x, CY), CARD_W, CARD_H,
                  boxstyle="round,pad=0.02,rounding_size=0.16",
                  linewidth=1.4, edgecolor=EDGE, facecolor=CARD, zorder=2))
-    # accent bar at top of the card
-    ax.add_patch(FancyBboxPatch((x + 0.22, CY + CARD_H - 0.12), CARD_W - 0.44, 0.07,
+    ax.add_patch(FancyBboxPatch((x + 0.24, CY + CARD_H - 0.12), CARD_W - 0.48, 0.07,
                  boxstyle="round,pad=0.01,rounding_size=0.03",
                  linewidth=0, facecolor=accent, zorder=3))
+    # step-number badge (top-left) so beginners can follow the order
+    bx, by = x + 0.40, CY + CARD_H - 0.40
+    ax.add_patch(Circle((bx, by), 0.215, facecolor=accent, edgecolor="white",
+                        linewidth=2.0, zorder=6))
+    ax.text(bx, by, str(step), ha="center", va="center", fontsize=12.5,
+            fontweight="bold", color="white", zorder=7)
 
 
 def chip(cx, color):
@@ -68,10 +76,10 @@ def chip(cx, color):
 
 
 def label(cx, title, s1, s2, color):
-    ax.text(cx, TITLE_Y, title, ha="center", va="center", fontsize=14.5,
+    ax.text(cx, TITLE_Y, title, ha="center", va="center", fontsize=15.5,
             fontweight="bold", color=INK, zorder=4)
-    ax.text(cx, SUB1_Y, s1, ha="center", va="center", fontsize=11, color=SUB, zorder=4)
-    ax.text(cx, SUB2_Y, s2, ha="center", va="center", fontsize=11, color=color,
+    ax.text(cx, SUB1_Y, s1, ha="center", va="center", fontsize=11.5, color=SUB, zorder=4)
+    ax.text(cx, SUB2_Y, s2, ha="center", va="center", fontsize=11.5, color=color,
             fontweight="bold", zorder=4)
 
 
@@ -109,41 +117,40 @@ def icon_db(cx):
                          linewidth=2.0, zorder=6))
 
 
-def icon_search(cx):
-    chip(cx, OUT_C)
-    ax.add_patch(Circle((cx - 0.06, ICON_CY + 0.05), 0.22, facecolor="white",
-                        edgecolor=OUT_C, linewidth=3.0, zorder=4))
-    ax.add_patch(FancyArrowPatch((cx + 0.09, ICON_CY - 0.10), (cx + 0.30, ICON_CY - 0.30),
-                 arrowstyle="-", linewidth=4.0, color=OUT_C, zorder=4))
-
-
 # ---- build cards ------------------------------------------------------------
 specs = [
-    (icon_image, "Image", "any JPEG / PNG", "multimodal input", IMG_C),
-    (icon_cloud, "AWS Bedrock", "Titan Multimodal G1", "managed - 1024-d", AWS_C),
-    (icon_db, "IBM Db2", "one row per image", "BLOB + VECTOR(1024)", DB2_C),
-    (icon_search, "SQL search", "VECTOR_DISTANCE", "cosine - top-K", OUT_C),
+    (icon_image, "Your image", "a JPEG or PNG file", "what you start with", IMG_C),
+    (icon_cloud, "AWS Bedrock", "the Titan AI model", "reads image → numbers", AWS_C),
+    (icon_db, "IBM Db2", "one row stores both", "image + its vector", DB2_C),
 ]
-for x, c, (draw, t, s1, s2, col) in zip(XS, CENTERS, specs):
-    card(x, col)
+for x, c, (draw, t, s1, s2, col), step in zip(XS, CENTERS, specs, (1, 2, 3)):
+    card(x, col, step)
     draw(c)
     label(c, t, s1, s2, col)
 
-# ---- arrows + edge labels ---------------------------------------------------
-edge_labels = ["base64", "1024-d vector", "store + query"]
-for i in range(3):
+# ---- arrows + plain-language labels -----------------------------------------
+# Top line = the action; bottom line = what it means, for first-timers.
+edge_labels = [
+    ("send the image", "(uploaded to the cloud)"),
+    ("get the embedding back", "a list of 1,024 numbers"),
+]
+for i in range(2):
     x0 = XS[i] + CARD_W + 0.06
     x1 = XS[i + 1] - 0.06
     ya = CY + CARD_H / 2
     ax.add_patch(FancyArrowPatch((x0, ya), (x1, ya), arrowstyle="-|>",
-                 mutation_scale=22, linewidth=2.6, color=ARROW, zorder=1))
-    ax.text((x0 + x1) / 2, ya + 0.26, edge_labels[i], ha="center", va="center",
-            fontsize=10, color=SUB, fontweight="bold", zorder=5)
+                 mutation_scale=26, linewidth=3.0, color=ARROW, zorder=1))
+    top, bottom = edge_labels[i]
+    ax.text((x0 + x1) / 2, ya + 0.40, top, ha="center", va="center",
+            fontsize=11.5, color=INK, fontweight="bold", zorder=5)
+    ax.text((x0 + x1) / 2, ya + 0.14, bottom, ha="center", va="center",
+            fontsize=10, color=SUB, style="italic", zorder=5)
 
 # ---- footer -----------------------------------------------------------------
-ax.text(W / 2, 1.18, "Images and text share one vector space - search images with a text query, all inside Db2.",
+ax.text(W / 2, 1.12,
+        "An embedding is a list of numbers that captures what's in an image - similar pictures get similar numbers.",
         ha="center", va="center", fontsize=12, color=INK)
-ax.text(W / 2, 0.62, "github.com/IBM/db2-multimodal-embedding", ha="center", va="center",
+ax.text(W / 2, 0.60, "github.com/IBM/db2-multimodal-embedding", ha="center", va="center",
         fontsize=11.5, color=DB2_C, fontweight="bold")
 
 out = "docs/workflow_linkedin.png"
