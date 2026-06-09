@@ -9,14 +9,9 @@
 
 This is a minimal, end-to-end **tutorial**: managed inference wired straight into a SQL database that understands vectors. The whole client is ~40 lines in [`embed_image.py`](embed_image.py).
 
-```mermaid
-flowchart LR
-    IMG["sample.jpg"] -->|raw base64| BR["AWS Bedrock<br/>Titan Multimodal G1"]
-    BR -->|1024-d vector| APP["embed_image.py"]
-    IMG -.raw bytes.-> APP
-    APP -->|"BLOB + VECTOR"| DB[("Db2 SAMPLE<br/>image_embeddings")]
-    DB --> Q["VECTOR_DISTANCE"]
-```
+![Workflow: an image is sent as base64 to AWS Bedrock (Titan Multimodal G1), which returns a 1024-d vector; the image (BLOB) and vector (VECTOR(1024)) are stored in one IBM Db2 row and searched with VECTOR_DISTANCE cosine](docs/workflow_linkedin.png)
+
+<sub>Diagram source: [`docs/make_workflow_image.py`](docs/make_workflow_image.py) → regenerate with `python3 docs/make_workflow_image.py`. The PNG is 2400×1350 (16:9), sized for sharing on LinkedIn.</sub>
 
 > **Verified on:** RHEL 9.6 · Python 3.12 · `boto3` + `python-dotenv` + `ibm_db` · Db2 **12.1.5** (the `VECTOR` type needs Db2 **≥ 12.1.2**) with the stock `SAMPLE` database. Inference runs in your AWS account (pay per request); storage is local or remote Db2.
 
