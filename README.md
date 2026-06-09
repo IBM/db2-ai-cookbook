@@ -19,8 +19,9 @@ flowchart LR
       M3["AWS Bedrock + Titan<br/>1024-d · managed"]
     end
     ENGINE --> VEC["embedding vector"]
-    VEC --> DB[("Db2 SAMPLE<br/>BLOB + VECTOR")]
+    VEC -->|"vLLM + Bedrock modules"| DB[("Db2 SAMPLE<br/>BLOB + VECTOR")]
     DB --> Q["VECTOR_DISTANCE<br/>similarity search"]
+    VEC -.->|"Infinity module"| CALLER["returned to caller<br/>(no Db2)"]
 ```
 
 ## Modules
