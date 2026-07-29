@@ -255,7 +255,7 @@ Db2 runs with `AUTHENTICATION=SERVER`, so it authenticates against the OS, not a
 Set `DB2_PORT` if your `SVCENAME` from Step 2.1 is not `50000`. The remaining defaults work as-is.
 
 `.env` is git-ignored — real credentials are never committed. See
-[`.env.example`](.env.example) for every key.
+[`.env.example`](../.env.example) for every key.
 
 ---
 
@@ -302,7 +302,7 @@ chat OK
 Zero chunks is correct before your first ingest — the check creates the empty table, which also
 proves the credentials can write. If the Db2 line fails instead, the **last line** of the
 traceback names the cause (`SQL30082N`, `SQL1032N`, …); look it up in
-[Troubleshooting](#troubleshooting).
+[Troubleshooting](troubleshooting.md).
 
 That's the one-time setup — **everything below is the day-to-day workflow.**
 
