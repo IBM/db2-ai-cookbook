@@ -1,20 +1,21 @@
-langgraph 
-langchain-community 
-langchain-text-splitters
-ipykernel
-jupyter
-tiktoken
-langchain_ibm
+# Pinned to versions that install together (verified 2026-07-29).
+langgraph==1.2.10
+langchain-community==0.4.2
+langchain-text-splitters==1.1.2
+ipykernel==7.3.0
+jupyter==1.1.1
+tiktoken==0.13.0
+langchain-ibm==1.1.0
 ibm_watsonx_ai==1.6.0        # imported directly by agent.ipynb
-langchain                    # imported directly by agent.ipynb
+langchain==1.3.14   # imported directly by agent.ipynb
 pydantic==2.13.4             # imported directly by agent.ipynb
-python-dotenv
-langchain-ollama>=0.1.0
-trafilatura
-spacy
-llama-cpp-python
-huggingface-hub
-pygraphviz
-langchain-db2
-langchain-core
-ibm_db
+python-dotenv==1.2.2
+langchain-ollama==1.1.0
+trafilatura==2.1.0
+spacy==3.8.14
+llama_cpp_python==0.3.34
+huggingface_hub==1.25.1
+pygraphviz==2.0.1
+langchain-db2==1.0.0
+langchain-core==1.5.2
+ibm_db==3.2.9

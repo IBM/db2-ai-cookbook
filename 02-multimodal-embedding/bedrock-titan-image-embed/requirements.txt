@@ -1,3 +1,4 @@
-boto3
-python-dotenv
-ibm_db
+# Pinned to versions that install together (verified 2026-07-29).
+boto3==1.43.59
+python-dotenv==1.2.2
+ibm_db==3.2.9

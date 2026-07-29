@@ -1,3 +1,4 @@
+# Pinned to versions that install together (verified 2026-07-29).
 # LangChain ecosystem - pinned to working versions
 langchain==0.3.27
 langchain-community==0.3.27
@@ -7,23 +8,23 @@ langchain-text-splitters==0.3.9
 langchain-ibm==0.3.15
 ibm_watsonx_ai==1.6.0        # imported directly by rag-basic.ipynb
 pydantic==2.13.4             # imported directly by rag-basic.ipynb
-langgraph
+langgraph==1.0.1
 
 # LLM and embeddings - pinned to working version
 llama-cpp-python==0.3.14
 
 # Database
-ibm_db
+ibm-db==3.2.9
 
 # Document processing
-trafilatura
-spacy
+trafilatura==2.1.0
+spacy==3.8.14
 
 # Utilities
-python-dotenv
-tiktoken
-huggingface-hub
+python-dotenv==1.2.2
+tiktoken==0.13.0
+huggingface-hub==1.25.1
 
 # Jupyter environment
-ipykernel
-jupyter
+ipykernel==7.3.0
+jupyter==1.1.1
