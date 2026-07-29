@@ -38,7 +38,7 @@ db2-ai-cookbook/
 │   ├── bedrock-titan-image-embed/
 │   └── README.md
 ├── 02-rag/                       # documents → chunks → Db2 VECTOR → grounded answers
-│   ├── db2-haystack-rag/
+│   ├── haystack-local-models/
 │   └── README.md
 ├── LICENSE
 └── README.md                     # you are here
@@ -48,9 +48,18 @@ Modules are numbered so they sort in a deliberate reading order; the number is p
 
 ## Adding a module
 
-1. Create a numbered folder (`02-…`) with a `README.md` that opens with a one-line description, then lists its recipes in a table.
+1. Create a numbered folder (`03-…`) with a `README.md` that opens with a one-line description, then lists its recipes in a table.
 2. Add a row to the [Modules](#modules) table above.
 3. Put each recipe in its own subfolder — one per engine/model combo, with its own `.venv` and **pinned** `requirements.txt`. These stacks bit-rot quickly against current PyPI.
+
+### Naming
+
+Don't repeat what the path already says. A module folder names the **capability** (`rag`, not `db2-rag` — the whole cookbook is Db2). A recipe folder names what makes it *different from its siblings*, which is usually the engine or framework plus the model or how models are served:
+
+```
+01-multimodal-embedding/infinity-jina-clip-v2      engine + model
+02-rag/haystack-local-models                       framework + model hosting
+```
 
 ### Recipe README shape
 

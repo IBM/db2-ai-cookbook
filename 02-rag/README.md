@@ -30,7 +30,7 @@ flowchart LR
 
 | Recipe | Stack | Models | Dim | Db2 storage |
 |---|---|---|---|---|
-| [db2-haystack-rag](db2-haystack-rag/) | [Haystack](https://haystack.deepset.ai/) pipelines + [Docling](https://github.com/docling-project/docling) parsing | two local models via [llama.cpp](https://github.com/ggml-org/llama.cpp), OpenAI-compatible API | 384 | one table, `VECTOR(384)` |
+| [haystack-local-models](haystack-local-models/) | [Haystack](https://haystack.deepset.ai/) pipelines + [Docling](https://github.com/docling-project/docling) parsing | two local models via [llama.cpp](https://github.com/ggml-org/llama.cpp), OpenAI-compatible API | 384 | one table, `VECTOR(384)` |
 
 Everything runs on your own machine — no API keys, no cloud, no per-call cost.
 
@@ -44,12 +44,12 @@ Each recipe's README covers the rest — model downloads, server setup, and its 
 
 ## Quick start
 
-- **[db2-haystack-rag →](db2-haystack-rag/README.md#full-setup-on-a-fresh-rhel-box)** — takes a bare Red Hat machine to answered questions, one command at a time.
+- **[haystack-local-models →](haystack-local-models/README.md#full-setup-on-a-fresh-rhel-box)** — takes a bare Red Hat machine to answered questions, one command at a time.
 
 ## Module layout
 
 ```
 02-rag/
-├── db2-haystack-rag/    # Haystack + Docling + local llama.cpp models → Db2 VECTOR
-└── README.md            # you are here
+├── haystack-local-models/    # Haystack + Docling + local llama.cpp models → Db2 VECTOR
+└── README.md                 # you are here
 ```
