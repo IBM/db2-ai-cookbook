@@ -30,7 +30,7 @@ flowchart LR
     TOP -.->|"optional"| RR["cross-encoder rerank"]
 ```
 
-Where [multimodal embedding](../01-multimodal-embedding/) produces vectors and [RAG](../03-rag/)
+Where [multimodal embedding](../02-multimodal-embedding/) produces vectors and [RAG](../04-rag/)
 answers from what you retrieve, this module is about the retrieval itself — and how to tell
 whether it actually got better.
 
@@ -63,7 +63,7 @@ is something you can measure rather than eyeball. See
 ## Module layout
 
 ```
-02-hybrid-search/
+03-hybrid-search/
 ├── sql-fusion-local-models/   # BM25 + vector, fused in SQL · demo UI · eval harness
 └── README.md                  # you are here
 ```

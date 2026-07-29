@@ -166,7 +166,7 @@ Deliberately omitted to stay minimal: error handling/retries, request batching, 
 ```bash
 # 1. Get the code
 git clone https://github.com/IBM/db2-ai-cookbook.git
-cd db2-ai-cookbook/01-multimodal-embedding/bedrock-titan-image-embed
+cd db2-ai-cookbook/02-multimodal-embedding/bedrock-titan-image-embed
 
 # 2. Install the client (no model download, no compiler, no server)
 python3.12 -m venv .venv && source .venv/bin/activate

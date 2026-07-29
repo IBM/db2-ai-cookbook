@@ -404,7 +404,7 @@ These were throwaway servers. Step 7 starts the real ones on their proper ports.
 ```bash
 cd ~
 git clone https://github.com/IBM/db2-ai-cookbook.git
-cd db2-ai-cookbook/03-rag/haystack-local-models
+cd db2-ai-cookbook/04-rag/haystack-local-models
 ```
 
 Every path from here on is relative to that folder. The sample PDF (`data/M-Lean_Article.pdf`)

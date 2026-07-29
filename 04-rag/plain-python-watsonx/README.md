@@ -61,7 +61,7 @@ Clone the cookbook and enter this recipe — every path below is relative to it:
 
 ```bash
 git clone https://github.com/IBM/db2-ai-cookbook.git
-cd db2-ai-cookbook/03-rag/plain-python-watsonx
+cd db2-ai-cookbook/04-rag/plain-python-watsonx
 ```
 
 Then run the setup script on a Red Hat Linux (RHEL 9.4) system:

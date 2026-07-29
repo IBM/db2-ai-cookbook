@@ -184,7 +184,7 @@ python3.12 --version || sudo dnf install -y python3.12
 
 ```bash
 git clone https://github.com/IBM/db2-ai-cookbook.git
-cd db2-ai-cookbook/01-multimodal-embedding/vllm-vlm2vec-image-embed
+cd db2-ai-cookbook/02-multimodal-embedding/vllm-vlm2vec-image-embed
 ```
 
 ### 2. Create the recipe's virtualenv
@@ -239,7 +239,7 @@ pip install . --no-build-isolation
 Run this **from the recipe folder, not `/tmp/vllm-build`** — inside the build dir its `vllm/` source subfolder shadows the installed package and you'll get a misleading `ModuleNotFoundError`:
 
 ```bash
-cd ~/db2-ai-cookbook/01-multimodal-embedding/vllm-vlm2vec-image-embed
+cd ~/db2-ai-cookbook/02-multimodal-embedding/vllm-vlm2vec-image-embed
 python3 -c "import vllm._C; print('vllm._C OK')"
 python3 -c "import torch; print(torch.__version__)"     # -> 2.11.0+cpu
 ```

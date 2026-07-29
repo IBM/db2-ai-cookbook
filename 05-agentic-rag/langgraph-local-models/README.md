@@ -8,7 +8,7 @@ Get the code by cloning the cookbook — every path below is relative to this re
 
 ```bash
 git clone https://github.com/IBM/db2-ai-cookbook.git
-cd db2-ai-cookbook/04-agentic-rag/langgraph-local-models
+cd db2-ai-cookbook/05-agentic-rag/langgraph-local-models
 ```
 
 ## 🎯 Use Case Overview

@@ -362,7 +362,7 @@ Python package, the service scripts, and the corpus all live here:
 ```bash
 cd ~
 git clone https://github.com/IBM/db2-ai-cookbook.git
-cd db2-ai-cookbook/02-hybrid-search/sql-fusion-local-models
+cd db2-ai-cookbook/03-hybrid-search/sql-fusion-local-models
 ```
 
 Every path from here on is relative to that folder.

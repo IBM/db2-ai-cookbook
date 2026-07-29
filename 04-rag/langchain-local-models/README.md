@@ -99,7 +99,7 @@ git clone https://github.com/IBM/db2-ai-cookbook.git
 
 Go to this recipe's directory — every path below is relative to it:
 ```bash
-cd db2-ai-cookbook/03-rag/langchain-local-models
+cd db2-ai-cookbook/04-rag/langchain-local-models
 ```
 
 ### 4. Environment & Dependencies

@@ -10,7 +10,7 @@
 ![Python](https://img.shields.io/badge/Python-3-blue)
 ![Status](https://img.shields.io/badge/purpose-learning%20%2F%20reference-success)
 
-Where the [multimodal embedding](../01-multimodal-embedding/) module stops at *producing and
+Where the [multimodal embedding](../02-multimodal-embedding/) module stops at *producing and
 storing* a vector, this module closes the loop: retrieve the right vectors for a question, and
 ground an answer in them.
 
@@ -68,7 +68,7 @@ Each recipe's README covers the rest — model downloads, server setup, and its 
 ## Module layout
 
 ```
-03-rag/
+04-rag/
 ├── haystack-local-models/     # Haystack + Docling, PDF in, Python scripts
 ├── langchain-local-models/    # LangChain + trafilatura, web article in, notebook
 ├── plain-python-watsonx/      # no framework, raw SQL, hosted watsonx generation

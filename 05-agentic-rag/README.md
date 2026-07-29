@@ -10,7 +10,7 @@
 ![Python](https://img.shields.io/badge/Python-3.12%2B-blue)
 ![Status](https://img.shields.io/badge/purpose-learning%20%2F%20reference-success)
 
-Plain [RAG](../03-rag/) is a straight line: embed the question, take the top *k* chunks, answer
+Plain [RAG](../04-rag/) is a straight line: embed the question, take the top *k* chunks, answer
 from them. It has no way to notice that the top *k* were useless — a vague query, an unlucky
 embedding, a corpus that doesn't cover the topic — so it answers anyway, from bad context.
 
@@ -62,7 +62,7 @@ anything else can call it.
 ## Module layout
 
 ```
-04-agentic-rag/
+05-agentic-rag/
 ├── langgraph-local-models/   # LangGraph agent loop: notebook prototype + 3 FastAPI services
 └── README.md                 # you are here
 ```

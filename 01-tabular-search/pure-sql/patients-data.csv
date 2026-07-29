@@ -1,0 +1,21 @@
+patient_id,name,age,gender,cholesterol_level,blood_pressure,smoking_status
+1,Allison Hill,20,Female,165,94,Non-smoker
+2,Noah Rhodes,43,Male,193,114,Non-smoker
+3,Angie Henderson,38,Female,152,81,Non-smoker
+4,Daniel Wagner,26,Male,182,118,Non-smoker
+5,Cristian Santos,37,Male,195,114,Non-smoker
+6,Connie Lawrence,57,Female,237,155,Smoker
+7,Abigail Shaffer,44,Male,194,107,Non-smoker
+8,Gina Moore,58,Male,213,163,Smoker
+9,Gabrielle Davis,22,Female,156,102,Non-smoker
+10,Ryan Munoz,69,Female,202,178,Smoker
+11,Monica Herrera,49,Female,155,115,Non-smoker
+12,Jamie Arnold,76,Female,236,144,Smoker
+13,Lisa Hensley,21,Male,199,98,Non-smoker
+14,Michele Williams,47,Male,156,104,Non-smoker
+15,Dylan Miller,64,Female,210,167,Smoker
+16,Brian Ramirez,56,Female,244,129,Smoker
+17,Holly Wood,37,Male,160,109,Non-smoker
+18,Derek Zuniga,58,Male,243,161,Smoker
+19,Lisa Jackson,27,Male,170,105,Non-smoker
+20,Carla Gray,52,Male,236,160,Smoker
