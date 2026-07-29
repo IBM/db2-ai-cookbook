@@ -19,6 +19,8 @@ __pycache__/
 *.egg-info/
 build/
 dist/
+wheels/
+.Python
 .ipynb_checkpoints/
 .pytest_cache/
 .mypy_cache/
@@ -47,6 +49,7 @@ tmp/
 *.rej
 *~
 *.swp
+*.swo
 .idea/
 .vscode/
 
