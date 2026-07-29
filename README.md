@@ -18,6 +18,7 @@ Pick a module, pick a recipe inside it, follow the Quick start.
 | Module | What it covers | Recipes |
 |---|---|---|
 | [01-multimodal-embedding](01-multimodal-embedding/) | Turn images and text into vectors with three interchangeable embedding services — two self-hosted on CPU, one managed on AWS — and store the results in a Db2 `VECTOR` column for SQL similarity search. Both modalities land in the same vector space, so you can embed a text query and rank images against it. | 3 |
+| [02-rag](02-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Parse a PDF into structured chunks, embed and store them, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts — citing the page and section each came from. Runs entirely on your own machine. | 1 |
 
 More modules are on the way. See [Adding a module](#adding-a-module) below.
 
@@ -35,6 +36,9 @@ db2-ai-cookbook/
 │   ├── infinity-jina-clip-v2/
 │   ├── vllm-vlm2vec-image-embed/
 │   ├── bedrock-titan-image-embed/
+│   └── README.md
+├── 02-rag/                       # documents → chunks → Db2 VECTOR → grounded answers
+│   ├── db2-haystack-rag/
 │   └── README.md
 ├── LICENSE
 └── README.md                     # you are here

@@ -1,0 +1,6 @@
+# Recipe-local rules. Secrets, virtualenvs, Python caches and logs are
+# already covered by the cookbook's root .gitignore.
+
+# The sample PDF ships with the recipe; anything else you drop in data/ stays out
+data/*
+!data/M-Lean_Article.pdf

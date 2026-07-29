@@ -11,6 +11,7 @@ dist/
 # Runtime server logs
 server.log
 *.log
+logs/
 
 # Infinity on-disk cache
 .infinity_cache/
@@ -26,3 +27,4 @@ core.*
 
 # OS / editor cruft
 .DS_Store
+.vscode/
