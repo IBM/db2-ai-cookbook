@@ -15,12 +15,24 @@ Pick a module, pick a recipe inside it, follow the Quick start.
 
 ## Modules
 
-| Module | What it covers | Recipes |
-|---|---|---|
-| [01-multimodal-embedding](01-multimodal-embedding/) | Turn images and text into vectors with three interchangeable embedding services — two self-hosted on CPU, one managed on AWS — and store the results in a Db2 `VECTOR` column for SQL similarity search. Both modalities land in the same vector space, so you can embed a text query and rank images against it. | 3 |
-| [02-hybrid-search](02-hybrid-search/) | Find the right rows by combining keyword search and semantic search. Db2 Text Search gives the BM25 leg, native `VECTOR` columns with in-database `TO_EMBEDDING` give the semantic one, and a single SQL query fuses both rankings so each covers the other's blind spot. Ships a demo UI and a 118-query eval harness, so a change to the fusion is something you can measure. | 1 |
-| [03-rag](03-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Chunk a source document, embed and store the chunks, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts alone. Three recipes solve this different ways — Haystack over a PDF, LangChain over a web article, and one with no framework at all that calls a hosted watsonx.ai model — so you can see which parts of a RAG pipeline are essential and which are framework flavour. | 3 |
-| [04-agentic-rag](04-agentic-rag/) | RAG that checks its own work. A LangGraph agent grades the documents it retrieved, and when they don't answer the question it rewrites the query and retries rather than answering from bad context. Shows the pipeline twice — once as a notebook prototype, then split into three FastAPI microservices behind a gateway, which is the step most RAG tutorials skip. | 1 |
+**Not sure where to start?**
+
+- **Shortest path to working code** → [01-tabular-search](01-tabular-search/). Pure SQL, three
+  commands, nothing to install.
+- **Here for RAG** → [04-rag](04-rag/). It stands alone; you do not need the modules before it.
+- **Building search** → [01-tabular-search](01-tabular-search/), then
+  [03-hybrid-search](03-hybrid-search/).
+- **Reading straight through** → start at 01. Each module assumes only what the earlier ones
+  introduced.
+
+| Module | What it covers | Needs | Recipes |
+|---|---|---|---|
+| [01-tabular-search](01-tabular-search/) | Similarity search over the rows of an ordinary table. Give each row a vector, and `VECTOR_DISTANCE` ranks rows by closeness — while a normal `WHERE` clause filters on ordinary columns in the same statement, which is the part a standalone vector store cannot do. The simplest module in the cookbook: pure SQL, no Python, and on Db2 12.1's `SAMPLE` database the demo table already exists, so it runs with zero setup. | SQL only, or Python + watsonx.ai | 2 |
+| [02-multimodal-embedding](02-multimodal-embedding/) | Turn images and text into vectors with three interchangeable embedding services — two self-hosted on CPU, one managed on AWS — and store the results in a Db2 `VECTOR` column for SQL similarity search. Both modalities land in the same vector space, so you can embed a text query and rank images against it. | Python + models (one uses AWS) | 3 |
+| [03-hybrid-search](03-hybrid-search/) | Find the right rows by combining keyword search and semantic search. Db2 Text Search gives the BM25 leg, native `VECTOR` columns with in-database `TO_EMBEDDING` give the semantic one, and a single SQL query fuses both rankings so each covers the other's blind spot. Ships a demo UI and a 118-query eval harness, so a change to the fusion is something you can measure. | Python + OpenSearch, Db2 12.1.5 | 1 |
+| [04-rag](04-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Chunk a source document, embed and store the chunks, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts alone. Three recipes solve this different ways — Haystack over a PDF, LangChain over a web article, and one with no framework at all that calls a hosted watsonx.ai model — so you can see which parts of a RAG pipeline are essential and which are framework flavour. | Python + local models, or watsonx.ai | 4 |
+| [05-agentic-rag](05-agentic-rag/) | RAG that checks its own work. A LangGraph agent grades the documents it retrieved, and when they don't answer the question it rewrites the query and retries rather than answering from bad context. Shows the pipeline twice — once as a notebook prototype, then split into three FastAPI microservices behind a gateway, which is the step most RAG tutorials skip. | Python + local models | 1 |
+| [06-recommendation](06-recommendation/) | Item-to-item recommendation: "find me something like this one — that I can actually get". Product attributes become a vector, `VECTOR_DISTANCE` ranks the catalogue, and store, size and stock filter it in the same statement — because a recommendation nobody can buy is worthless. | Python + watsonx.ai | 1 |
 
 More modules are on the way. See [Adding a module](#adding-a-module) below.
 
@@ -28,7 +40,9 @@ More modules are on the way. See [Adding a module](#adding-a-module) below.
 
 Most recipes that persist vectors need **Db2 ≥ 12.1.2** (where the `VECTOR` type lands) with the `SAMPLE` database, reachable either locally (run as the instance owner) or over TCP/IP (`DB2COMM=TCPIP`, default port `50000`). Recipes that only compute embeddings and hand them back need no Db2 at all.
 
-One module asks for more: [02-hybrid-search](02-hybrid-search/) needs **Db2 12.1.5** plus OpenSearch, because it uses Db2 Text Search and in-database `TO_EMBEDDING` rather than just the `VECTOR` type.
+One module asks for less: [01-tabular-search](01-tabular-search/) is SQL only — no Python, no virtualenv, no models — and its table ships with the `SAMPLE` database on Db2 12.1, so it needs no setup at all.
+
+One module asks for more: [03-hybrid-search](03-hybrid-search/) needs **Db2 12.1.5** plus OpenSearch, because it uses Db2 Text Search and in-database `TO_EMBEDDING` rather than just the `VECTOR` type.
 
 Anything host-specific — OS package fixes, model downloads, build-from-source paths — lives in the relevant module or recipe README, not here.
 
@@ -36,21 +50,29 @@ Anything host-specific — OS package fixes, model downloads, build-from-source 
 
 ```
 db2-ai-cookbook/
-├── 01-multimodal-embedding/      # images + text → vectors → Db2 VECTOR
+├── 01-tabular-search/            # similarity over table rows
+│   ├── pure-sql/
+│   ├── python-watsonx/
+│   └── README.md
+├── 02-multimodal-embedding/      # images + text → vectors → Db2 VECTOR
 │   ├── infinity-jina-clip-v2/
 │   ├── vllm-vlm2vec-image-embed/
 │   ├── bedrock-titan-image-embed/
 │   └── README.md
-├── 02-hybrid-search/             # BM25 + vector, fused in one Db2 SQL query
+├── 03-hybrid-search/             # BM25 + vector, fused in one Db2 SQL query
 │   ├── sql-fusion-local-models/
 │   └── README.md
-├── 03-rag/                       # documents → chunks → Db2 VECTOR → grounded answers
+├── 04-rag/                       # documents → chunks → Db2 VECTOR → grounded answers
 │   ├── haystack-local-models/
 │   ├── langchain-local-models/
 │   ├── plain-python-watsonx/
+│   ├── autoai-watsonx/
 │   └── README.md
-├── 04-agentic-rag/               # RAG that grades its own retrieval and retries
+├── 05-agentic-rag/               # RAG that grades its own retrieval and retries
 │   ├── langgraph-local-models/
+│   └── README.md
+├── 06-recommendation/            # similar products, filtered by what's in stock
+│   ├── shoe-search-watsonx/
 │   └── README.md
 ├── LICENSE
 └── README.md                     # you are here
@@ -69,9 +91,12 @@ Modules are numbered so they sort in a deliberate reading order; the number is p
 Don't repeat what the path already says. A module folder names the **capability** (`rag`, not `db2-rag` — the whole cookbook is Db2). A recipe folder names what makes it *different from its siblings*, which is usually the engine or framework plus the model or how models are served:
 
 ```
-01-multimodal-embedding/infinity-jina-clip-v2      engine + model
-02-hybrid-search/sql-fusion-local-models           approach + model hosting
-03-rag/haystack-local-models                       framework + model hosting
+01-tabular-search/pure-sql                         approach (no framework at all)
+01-tabular-search/python-watsonx                   language + model hosting
+06-recommendation/shoe-search-watsonx              use case + model hosting
+02-multimodal-embedding/infinity-jina-clip-v2      engine + model
+03-hybrid-search/sql-fusion-local-models           approach + model hosting
+04-rag/haystack-local-models                       framework + model hosting
 ```
 
 Modules are numbered in reading order — each builds on the one before it. Inserting a module

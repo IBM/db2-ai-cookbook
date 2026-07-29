@@ -64,3 +64,6 @@ core.[0-9]*
 # OS noise
 .DS_Store
 Thumbs.db
+
+# scratch file written by loadvectors.sh
+temp.sql

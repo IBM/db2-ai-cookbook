@@ -1,0 +1,9 @@
+# Pinned: these versions resolve and import together (checked 2026-07-29).
+Faker==40.36.0
+ibm_watsonx_ai==1.6.0
+ipykernel==7.3.0
+matplotlib==3.11.1
+numpy==2.5.1
+pandas==2.3.3
+python-dotenv==1.2.2
+scikit-learn==1.9.0
