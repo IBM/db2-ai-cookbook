@@ -1,15 +1,17 @@
-ipykernel
-ibm-watsonx-ai
-python-dotenv
-rich
-langchain_ibm
-nbformat
-pandas
-matplotlib
-ibm_db
-itables
-scikit-learn
-numpy
-spacy
-trafilatura
-huggingface-hub
+# Pinned to versions that install and import together (verified 2026-07-29).
+ipykernel==7.3.0
+ibm_watsonx_ai==1.6.0
+python-dotenv==1.2.2
+rich==15.0.0
+langchain-ibm==1.1.0
+nbformat==5.10.4
+pandas==2.3.3
+matplotlib==3.11.1
+ibm_db==3.2.9
+llama-cpp-python==0.3.14   # imported by the notebook; version matches the langchain recipe
+itables==2.9.1
+scikit-learn==1.9.0
+numpy==2.5.1
+spacy==3.8.14
+trafilatura==2.1.0
+huggingface_hub==1.25.1

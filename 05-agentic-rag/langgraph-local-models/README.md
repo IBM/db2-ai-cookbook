@@ -1,5 +1,9 @@
 # 🔍 Agentic RAG with IBM Db2
 
+> **Local embeddings, hosted generation.** `granite-embedding-30m-english` runs locally via
+> `llama-cpp-python`; the language model is watsonx.ai, so this recipe needs `WATSONX_APIKEY`
+> and `WATSONX_PROJECT`.
+
 [← Db2 AI Cookbook](../../README.md) · [← Agentic RAG module](../README.md)
 
 This recipe demonstrates how to build an **agentic Retrieval-Augmented Generation (RAG)** workflow using IBM Db2 and the `langchain-db2` connector. It follows a modular architecture that progresses from a prototype implementation to production-ready microservices, culminating in a unified API gateway.

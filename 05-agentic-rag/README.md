@@ -31,14 +31,21 @@ flowchart TD
 The same language model that writes the answer also judges whether it *should* — which costs an
 extra call or two, and buys a system that degrades honestly instead of hallucinating.
 
+> **What runs where:** embeddings are generated **locally** with
+> `granite-embedding-30m-english` via `llama-cpp-python`; the agent's language model is **hosted
+> watsonx.ai**, so a `WATSONX_APIKEY` is required. Despite the recipe folder name, this is not a
+> fully local stack.
+
 ## Recipes
 
 | Recipe | Orchestration | Agent behaviour | Form |
 |---|---|---|---|
 | [langgraph-local-models](langgraph-local-models/) | [LangGraph](https://langchain-ai.github.io/langgraph/) over the `langchain-db2` connector | grade retrieved docs · rewrite the query · retry against an alternate source · fall back | a notebook prototype **and** the same pipeline split into three FastAPI services behind a gateway |
 
-Everything runs locally on CPU — Granite embeddings and the generation model through
-[llama.cpp](https://github.com/ggml-org/llama.cpp). No API keys, no cloud.
+Embeddings run locally on CPU — `granite-embedding-30m-english` through
+[llama.cpp](https://github.com/ggml-org/llama.cpp) — while the agent's reasoning and answers come
+from **hosted watsonx.ai** (`mistralai/mistral-large`). You need a `WATSONX_APIKEY`; the
+embedding half costs nothing.
 
 ## Two lessons in one recipe
 

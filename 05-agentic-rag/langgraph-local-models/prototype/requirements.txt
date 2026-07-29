@@ -5,6 +5,9 @@ ipykernel
 jupyter
 tiktoken
 langchain_ibm
+ibm_watsonx_ai==1.6.0        # imported directly by agent.ipynb
+langchain                    # imported directly by agent.ipynb
+pydantic==2.13.4             # imported directly by agent.ipynb
 python-dotenv
 langchain-ollama>=0.1.0
 trafilatura
