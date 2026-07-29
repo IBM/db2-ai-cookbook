@@ -1,0 +1,106 @@
+[
+  {
+    "id": 1,
+    "query": "atomic habits",
+    "query_type": "keyword",
+    "featured": true,
+    "gold_chunk_ids": [
+      66
+    ],
+    "note": "Exact title \u2014 the strongest keyword clue; every strategy nails it."
+  },
+  {
+    "id": 2,
+    "query": "eat that frog",
+    "query_type": "keyword",
+    "featured": true,
+    "gold_chunk_ids": [
+      23
+    ],
+    "note": "A quirky exact title ('frog' is a distinctive token) \u2014 a clean keyword win."
+  },
+  {
+    "id": 3,
+    "query": "charles kahlenberg",
+    "query_type": "keyword",
+    "featured": true,
+    "gold_chunk_ids": [
+      11
+    ],
+    "note": "Just the narrator's name \u2014 keyword nails it; meaning-based search has nothing to embed and wanders."
+  },
+  {
+    "id": 4,
+    "query": "doing well with your finances is more about behavior than being smart",
+    "query_type": "semantic",
+    "featured": true,
+    "gold_chunk_ids": [
+      75
+    ],
+    "note": "A paraphrase using none of the book's own words \u2014 keyword grabs a different money book; meaning finds The Psychology of Money."
+  },
+  {
+    "id": 5,
+    "query": "why we so often misjudge people we've just met",
+    "query_type": "semantic",
+    "featured": true,
+    "gold_chunk_ids": [
+      69
+    ],
+    "note": "The idea of Talking to Strangers in your own words \u2014 keyword lands a different communication book, meaning gets it."
+  },
+  {
+    "id": 6,
+    "query": "learning to say no to almost everything so you focus on the vital few",
+    "query_type": "semantic",
+    "featured": true,
+    "gold_chunk_ids": [
+      39
+    ],
+    "note": "The gist of Essentialism, worded around its own vocabulary \u2014 keyword drifts to a different productivity book."
+  },
+  {
+    "id": 7,
+    "query": "jason fung on reversing type 2 diabetes",
+    "query_type": "mixed",
+    "featured": true,
+    "gold_chunk_ids": [
+      61
+    ],
+    "note": "Author's name plus a topic \u2014 combine to The Diabetes Code, not his Obesity Code."
+  },
+  {
+    "id": 8,
+    "query": "cal newport on focusing deeply without distractions",
+    "query_type": "mixed",
+    "featured": true,
+    "gold_chunk_ids": [
+      15
+    ],
+    "note": "Author plus concept \u2014 picks Deep Work over his other title, Slow Productivity."
+  },
+  {
+    "id": 9,
+    "query": "the walter isaacson biography of the apple founder",
+    "query_type": "mixed",
+    "featured": true,
+    "gold_chunk_ids": [
+      33
+    ],
+    "note": "Author plus a description of the subject \u2014 picks Steve Jobs over his Benjamin Franklin biography."
+  },
+  {
+    "id": 10,
+    "query": "books to get better at speaking in front of a crowd",
+    "query_type": "semantic",
+    "featured": true,
+    "gold_chunk_ids": [
+      3,
+      9,
+      58,
+      73,
+      79
+    ],
+    "note": "A theme, not a single book \u2014 how many of the right public-speaking books surface (topical, scored by recall)."
+  }
+]

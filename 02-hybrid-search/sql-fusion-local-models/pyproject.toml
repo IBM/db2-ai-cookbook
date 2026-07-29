@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "db2-hybrid-search"
+version = "0.1.0"
+description = "Hybrid (BM25 + vector) search inside IBM Db2 12.1.5, with a local llama.cpp embedding server."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+dynamic = ["dependencies"]
+
+# Test-only deps, kept OUT of the runtime install so running the demo doesn't pull
+# a browser automation stack. playwright drives the headless-Chromium E2E suite;
+# httpx is what fastapi.testclient.TestClient runs on (bare fastapi doesn't pull it).
+#   pip install -e ".[test]" && python -m playwright install chromium
+[project.optional-dependencies]
+test = [
+    "playwright==1.61.0",
+    "httpx==0.28.1",
+]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+where = ["src"]

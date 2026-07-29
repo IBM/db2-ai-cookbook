@@ -1,0 +1,11 @@
+# Recipe-local rules. Secrets, virtualenvs, Python caches, logs, model weights and
+# editor junk are all covered by the cookbook's root .gitignore.
+
+# Generated build residue — rebuild with ui/build_fixtures.sh / build_eval_set.sh.
+# The PUBLISHED copies under ui/static/ ARE tracked: they power the offline demo.
+/ui/fixtures.json
+/ui/eval_set.json
+
+# Local-only working artifacts (kept on disk, never shipped).
+backup/
+QA_REPORT.md

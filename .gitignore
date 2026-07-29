@@ -1,5 +1,17 @@
+# --- Secrets: never commit real credentials ---
+# `.env.*` matters as much as `.env` — a `.env.bak.*` copy once slipped past a bare
+# `.env` rule and published a live Db2 password. Commit .env.example instead.
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*credentials*
+*secret*
+
 # Python virtual environments — multi-GB and machine-specific (absolute paths baked in)
 .venv/
+venv/
 
 # Python caches / build artifacts
 __pycache__/
@@ -7,24 +19,42 @@ __pycache__/
 *.egg-info/
 build/
 dist/
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# Runtime server logs
+# Runtime logs and generated artifacts
 server.log
 *.log
 logs/
+cache/
+out/
+scratch/
+tmp/
+*.npy
+
+# Model weights — GB-scale, always downloaded rather than committed
+*.gguf
 
 # Infinity on-disk cache
 .infinity_cache/
 
-# Secrets — local env files (API keys, tokens). Commit .env.example instead.
-.env
-.env.*
-!.env.example
-
-# Core dumps (e.g. from the AVX2 debugging)
-core
-core.*
-
-# OS / editor cruft
-.DS_Store
+# Backups / editor & session junk
+*.bak
+*.bak.*
+*.orig
+*.rej
+*~
+*.swp
+.idea/
 .vscode/
+
+# Core dumps (e.g. from the AVX2 debugging). Match `core` and `core.<pid>` only —
+# a bare `core.*` also swallows source files like core.py.
+core
+core.[0-9]*
+
+# OS noise
+.DS_Store
+Thumbs.db

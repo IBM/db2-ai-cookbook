@@ -49,7 +49,7 @@ Each recipe's README covers the rest — model downloads, server setup, and its 
 ## Module layout
 
 ```
-02-rag/
+03-rag/
 ├── haystack-local-models/    # Haystack + Docling + local llama.cpp models → Db2 VECTOR
 └── README.md                 # you are here
 ```

@@ -1,0 +1,1705 @@
+[
+  {
+    "id": 1,
+    "query": "influence expanded edition",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      1
+    ],
+    "rationale": "edition token 'expanded' vs [50]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 2,
+    "query": "mcgonigal's book on the science of resisting temptation",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      2
+    ],
+    "rationale": "author + concept; self-control theme",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 3,
+    "query": "staying composed when someone grills you with hostile questions",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      3
+    ],
+    "rationale": "handling tough Q&A on the spot",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 5,
+    "query": "21 secrets of self-made millionaires",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      5
+    ],
+    "rationale": "distinctive token 'millionaires'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 6,
+    "query": "leo babauta on limiting yourself to the essential few",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      6
+    ],
+    "rationale": "author; vs Essentialism [39]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 7,
+    "query": "adler's classic guide to reading a book well",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      7
+    ],
+    "rationale": "author collision vs [79]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 8,
+    "query": "a personal year-long experiment in getting more done at work and in life",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      8
+    ],
+    "rationale": "Chris Bailey's productivity project",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 9,
+    "query": "brian tracy on delivering a powerful winning speech",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      9
+    ],
+    "rationale": "Tracy collision; speaking",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 10,
+    "query": "elizabeth saunders on investing your time to cut stress",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      10
+    ],
+    "rationale": "author + concept",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 11,
+    "query": "why certain messages lodge in your mind while others are forgotten",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      11
+    ],
+    "rationale": "Made to Stick idea",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 12,
+    "query": "the black hawk autobiography",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      12
+    ],
+    "rationale": "distinctive title/subject",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 13,
+    "query": "bringing people-smarts and self-awareness into the workplace",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      13
+    ],
+    "rationale": "Goleman EQ at work",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 14,
+    "query": "good to great by jim collins",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      14
+    ],
+    "rationale": "exact title/author",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 15,
+    "query": "cal newport on focusing deeply without distractions",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      15
+    ],
+    "rationale": "Newport collision vs [91]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 16,
+    "query": "how to win friends and influence people",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      16
+    ],
+    "rationale": "exact classic title",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 17,
+    "query": "duhigg's book on how habits form and how to change them",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      17
+    ],
+    "rationale": "Duhigg collision vs [90]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 18,
+    "query": "unstuff your life",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      18
+    ],
+    "rationale": "unique token 'unstuff'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 19,
+    "query": "carnegie on how to stop worrying",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      19
+    ],
+    "rationale": "Carnegie collision vs [16]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 20,
+    "query": "matthews strength training book for women",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      20
+    ],
+    "rationale": "gender disambiguates vs [31]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 21,
+    "query": "the total money makeover",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      21
+    ],
+    "rationale": "distinctive token 'makeover'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 22,
+    "query": "robert lustig on sugar, processed food and obesity",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      22
+    ],
+    "rationale": "author; health cluster",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 23,
+    "query": "eat that frog",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      23
+    ],
+    "rationale": "distinctive token 'frog'; disambiguates Tracy",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 24,
+    "query": "an editor's hands-on techniques for sharper storytelling and prose",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      24
+    ],
+    "rationale": "Stein on Writing",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 25,
+    "query": "the energy bus",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      25
+    ],
+    "rationale": "distinctive token 'bus'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 26,
+    "query": "turning a single invention into royalties by letting companies do the work",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      26
+    ],
+    "rationale": "One Simple Idea",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 27,
+    "query": "brian tracy on setting and reaching your goals",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      27
+    ],
+    "rationale": "Tracy collision; Goals!",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 28,
+    "query": "brian tracy's no-excuses take on self discipline",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      28
+    ],
+    "rationale": "Tracy + discipline collision vs [84]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 29,
+    "query": "using neuroscience to stay sharp and calm under a heavy workload",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      29
+    ],
+    "rationale": "Your Brain at Work",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 30,
+    "query": "the elon musk biography",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      30
+    ],
+    "rationale": "title/subject",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 31,
+    "query": "matthews strength training book for men",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      31
+    ],
+    "rationale": "gender disambiguates vs [20]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 32,
+    "query": "muhammad, by martin lings",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      32
+    ],
+    "rationale": "distinctive tokens 'muhammad'/'lings'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 33,
+    "query": "isaacson's steve jobs biography",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      33
+    ],
+    "rationale": "Isaacson collision vs [41]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 34,
+    "query": "a business fable about curing terrible, soul-draining meetings",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      34
+    ],
+    "rationale": "Death by Meeting",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 35,
+    "query": "bossidy and charan on actually executing a strategy",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      35
+    ],
+    "rationale": "authors; vs GTD [40]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 36,
+    "query": "kahneman thinking fast and slow",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      36
+    ],
+    "rationale": "title/author",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 37,
+    "query": "napoleon hill think and grow rich",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      37
+    ],
+    "rationale": "title/author",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 38,
+    "query": "hbr's must reads on strategy",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      38
+    ],
+    "rationale": "distinctive token 'hbr'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 39,
+    "query": "learning to say no to almost everything so you focus on the vital few",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      39
+    ],
+    "rationale": "Essentialism vs [6]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 40,
+    "query": "getting things done david allen",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      40
+    ],
+    "rationale": "title/author (GTD)",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 41,
+    "query": "isaacson's benjamin franklin biography",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      41
+    ],
+    "rationale": "Isaacson collision vs [33]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 42,
+    "query": "burger and starbird on thinking more effectively",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      42
+    ],
+    "rationale": "authors; thinking cluster",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 43,
+    "query": "getting to yes, by fisher and ury",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      43
+    ],
+    "rationale": "authors + title",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 44,
+    "query": "joshua foer and the memory championship",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      44
+    ],
+    "rationale": "author; memory cluster",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 45,
+    "query": "extreme ownership, jocko willink",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      46
+    ],
+    "rationale": "title + author",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 46,
+    "query": "ron fry's how to study program",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      47
+    ],
+    "rationale": "distinctive token 'fry'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 47,
+    "query": "the 5 levels of leadership",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      48
+    ],
+    "rationale": "token 'levels'; disambiguates Maxwell",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 48,
+    "query": "joel fuhrman on eating to live longer",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      49
+    ],
+    "rationale": "author; health cluster",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 49,
+    "query": "the original cialdini influence, not the expanded one",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      50
+    ],
+    "rationale": "edition collision vs [1]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 50,
+    "query": "jack welch's winning",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      51
+    ],
+    "rationale": "distinctive token 'welch'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 51,
+    "query": "the elements of style strunk and white",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      52
+    ],
+    "rationale": "title/authors",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 52,
+    "query": "maxwell on leading by asking great questions",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      53
+    ],
+    "rationale": "Maxwell collision",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 53,
+    "query": "the surprising frugal habits of people who quietly built wealth",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      54
+    ],
+    "rationale": "Millionaire Next Door",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 54,
+    "query": "the wall street journal digest",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      55
+    ],
+    "rationale": "exact title",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 55,
+    "query": "patty azzarello on advancing your career",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      56
+    ],
+    "rationale": "author + concept (Rise)",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 56,
+    "query": "jason fung on the real cause of obesity",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      57
+    ],
+    "rationale": "Fung collision vs [61]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 57,
+    "query": "julian treasure on speaking so people truly listen",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      58
+    ],
+    "rationale": "author; speaking",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 58,
+    "query": "measure what matters okrs",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      59
+    ],
+    "rationale": "distinctive token 'okrs'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 59,
+    "query": "how specialist advisors turn what they know into a lucrative practice",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      60
+    ],
+    "rationale": "Business of Expertise",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 60,
+    "query": "jason fung on reversing type 2 diabetes",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      61
+    ],
+    "rationale": "Fung collision vs [57]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 61,
+    "query": "the new york times digest",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      62
+    ],
+    "rationale": "exact title",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 62,
+    "query": "knapp and zeratsky on making time for what matters",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      63
+    ],
+    "rationale": "authors; Make Time",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 63,
+    "query": "barbara oakley's study guide for kids and teens",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      64
+    ],
+    "rationale": "Oakley collision vs [80]; audience",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 64,
+    "query": "how world-class performers are built by focused practice rather than talent",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      65
+    ],
+    "rationale": "Peak",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 65,
+    "query": "tiny daily choices that compound into big change over time",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      66
+    ],
+    "rationale": "habits cluster [66]/[17]/[74]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 66,
+    "query": "the goggins one",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      67
+    ],
+    "rationale": "author surname token",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 68,
+    "query": "why we so often misjudge people we've just met",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      69
+    ],
+    "rationale": "Talking to Strangers",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 69,
+    "query": "maxwell on turning failure into a stepping stone",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      70
+    ],
+    "rationale": "Maxwell collision; Failing Forward",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 71,
+    "query": "pragmatic programmer",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      72
+    ],
+    "rationale": "exact title (software)",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 72,
+    "query": "grant baldwin on getting paid to speak for a living",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      73
+    ],
+    "rationale": "author; speaking",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 73,
+    "query": "the 7 habits of highly effective people",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      74
+    ],
+    "rationale": "exact title; habits cluster",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 74,
+    "query": "doing well with your finances is more about behavior than being smart",
+    "query_type": "semantic",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      75
+    ],
+    "rationale": "Psychology of Money",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 76,
+    "query": "clean architecture robert martin",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      77
+    ],
+    "rationale": "title/author (software)",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 77,
+    "query": "the $100m offers book",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      78
+    ],
+    "rationale": "distinctive token '100m'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 78,
+    "query": "adler's companion book on speaking and listening",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      79
+    ],
+    "rationale": "Adler collision vs [7]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 79,
+    "query": "barbara oakley's guide to getting good at math",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      80
+    ],
+    "rationale": "Oakley collision vs [64]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 80,
+    "query": "how to take smart notes",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      81
+    ],
+    "rationale": "distinctive token 'notes'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 81,
+    "query": "tiago forte's second brain note-taking system",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      82
+    ],
+    "rationale": "author; creativity/notes cluster",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 82,
+    "query": "crucial conversations third edition",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      83
+    ],
+    "rationale": "edition token vs [4]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 83,
+    "query": "ryan holiday's stoic book on self-control",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      84
+    ],
+    "rationale": "author; discipline collision vs [28]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 84,
+    "query": "peter attia on living longer and preventing chronic disease",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      85
+    ],
+    "rationale": "author; longevity/health",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 85,
+    "query": "steal like an artist",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      86
+    ],
+    "rationale": "distinctive token 'steal'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 86,
+    "query": "dr gabrielle lyon on building muscle to age well",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      87
+    ],
+    "rationale": "author; health cluster",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 87,
+    "query": "the diary of a ceo",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      88
+    ],
+    "rationale": "distinctive token 'diary'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 88,
+    "query": "adam grant on unlocking hidden potential",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      89
+    ],
+    "rationale": "author; title concept",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 89,
+    "query": "supercommunicators",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      90
+    ],
+    "rationale": "distinctive title; disambiguates Duhigg vs [17]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 90,
+    "query": "cal newport's book about accomplishing without burning out",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      91
+    ],
+    "rationale": "Newport collision vs [15]",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 91,
+    "query": "brian tracy on taking full responsibility for your life",
+    "query_type": "mixed",
+    "query_class": "known_item",
+    "difficulty": "hard",
+    "gold_ids": [
+      92
+    ],
+    "rationale": "Tracy collision; Take Charge",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 92,
+    "query": "six thinking hats",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      93
+    ],
+    "rationale": "distinctive token 'hats'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 93,
+    "query": "build a large language model from scratch",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      94
+    ],
+    "rationale": "exact title (software)",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 94,
+    "query": "ai engineering chip huyen",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      95
+    ],
+    "rationale": "title/author (software)",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 95,
+    "query": "open to work, the linkedin book",
+    "query_type": "keyword",
+    "query_class": "known_item",
+    "difficulty": "easy",
+    "gold_ids": [
+      96
+    ],
+    "rationale": "distinctive token 'linkedin'",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 97,
+    "query": "books to get better at speaking in front of a crowd",
+    "query_type": "semantic",
+    "query_class": "topical",
+    "difficulty": "hard",
+    "gold_ids": [
+      3,
+      9,
+      58,
+      73,
+      79
+    ],
+    "rationale": "public-speaking / presenting; excludes 1:1 communication",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 98,
+    "query": "the software engineering and AI-building ones",
+    "query_type": "semantic",
+    "query_class": "topical",
+    "difficulty": "easy",
+    "gold_ids": [
+      72,
+      77,
+      94,
+      95
+    ],
+    "rationale": "software_engineering pillar",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 99,
+    "query": "everything i have on building better habits",
+    "query_type": "semantic",
+    "query_class": "topical",
+    "difficulty": "hard",
+    "gold_ids": [
+      17,
+      66,
+      74
+    ],
+    "rationale": "habits cluster",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 100,
+    "query": "productivity systems and time-management methods",
+    "query_type": "semantic",
+    "query_class": "topical",
+    "difficulty": "hard",
+    "gold_ids": [
+      8,
+      15,
+      23,
+      39,
+      40,
+      63,
+      91
+    ],
+    "rationale": "productivity how-to",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 101,
+    "query": "leadership and running a company",
+    "query_type": "semantic",
+    "query_class": "topical",
+    "difficulty": "hard",
+    "gold_ids": [
+      14,
+      48,
+      51,
+      53
+    ],
+    "rationale": "leadership/management core",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 102,
+    "query": "personal finance and building wealth",
+    "query_type": "semantic",
+    "query_class": "topical",
+    "difficulty": "hard",
+    "gold_ids": [
+      21,
+      37,
+      54,
+      75
+    ],
+    "rationale": "money/wealth",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 103,
+    "query": "diet, health and living longer",
+    "query_type": "semantic",
+    "query_class": "topical",
+    "difficulty": "hard",
+    "gold_ids": [
+      22,
+      49,
+      57,
+      61,
+      85,
+      87
+    ],
+    "rationale": "health/diet/longevity",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 104,
+    "query": "strength training and getting in shape",
+    "query_type": "semantic",
+    "query_class": "topical",
+    "difficulty": "hard",
+    "gold_ids": [
+      20,
+      31,
+      87
+    ],
+    "rationale": "fitness/muscle",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 105,
+    "query": "biographies of famous people",
+    "query_type": "semantic",
+    "query_class": "topical",
+    "difficulty": "easy",
+    "gold_ids": [
+      12,
+      30,
+      32,
+      33,
+      41
+    ],
+    "rationale": "biography/memoir of a person",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 106,
+    "query": "improving memory and how to learn",
+    "query_type": "semantic",
+    "query_class": "topical",
+    "difficulty": "hard",
+    "gold_ids": [
+      44,
+      64,
+      65,
+      80
+    ],
+    "rationale": "memory + learning-to-learn",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 107,
+    "query": "difficult conversations and dealing with people",
+    "query_type": "semantic",
+    "query_class": "topical",
+    "difficulty": "hard",
+    "gold_ids": [
+      16,
+      43,
+      69,
+      83,
+      90
+    ],
+    "rationale": "interpersonal communication/negotiation",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 109,
+    "query": "self-discipline and willpower",
+    "query_type": "semantic",
+    "query_class": "topical",
+    "difficulty": "hard",
+    "gold_ids": [
+      2,
+      28,
+      67,
+      84
+    ],
+    "rationale": "discipline/willpower",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "holdout"
+  },
+  {
+    "id": 110,
+    "query": "creativity and capturing ideas",
+    "query_type": "semantic",
+    "query_class": "topical",
+    "difficulty": "hard",
+    "gold_ids": [
+      26,
+      82,
+      86
+    ],
+    "rationale": "creativity/idea capture",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 111,
+    "query": "persuasion and negotiation",
+    "query_type": "semantic",
+    "query_class": "topical",
+    "difficulty": "hard",
+    "gold_ids": [
+      1,
+      43,
+      50
+    ],
+    "rationale": "persuasion/negotiation (incl. both Influence editions)",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 112,
+    "query": "the brian tracy audiobooks",
+    "query_type": "keyword",
+    "query_class": "topical",
+    "difficulty": "hard",
+    "gold_ids": [
+      5,
+      9,
+      23,
+      27,
+      28,
+      92
+    ],
+    "rationale": "same-author roll-up (6 Tracy books)",
+    "source": "silver",
+    "review_status": "needs_review",
+    "split": "train"
+  },
+  {
+    "id": 113,
+    "query": "walter dixon",
+    "gold_ids": [
+      2
+    ],
+    "query_class": "known_item",
+    "query_type": "keyword",
+    "difficulty": "hard",
+    "split": "train",
+    "source": "leg_discriminating",
+    "review_status": "verified",
+    "rationale": "narrator-only query; lexical #1, vector #15 (drifts to the Isaacson biographies), hybrid #3"
+  },
+  {
+    "id": 114,
+    "query": "bob walter",
+    "gold_ids": [
+      29
+    ],
+    "query_class": "known_item",
+    "query_type": "keyword",
+    "difficulty": "hard",
+    "split": "train",
+    "source": "leg_discriminating",
+    "review_status": "verified",
+    "rationale": "narrator-only query; lexical #1, vector #7, hybrid #3"
+  },
+  {
+    "id": 115,
+    "query": "laural merlington",
+    "gold_ids": [
+      64
+    ],
+    "query_class": "known_item",
+    "query_type": "keyword",
+    "difficulty": "hard",
+    "split": "train",
+    "source": "leg_discriminating",
+    "review_status": "verified",
+    "rationale": "narrator-only query; lexical #1, vector #8, hybrid #1"
+  },
+  {
+    "id": 116,
+    "query": "anna katarina",
+    "gold_ids": [
+      72
+    ],
+    "query_class": "known_item",
+    "query_type": "keyword",
+    "difficulty": "hard",
+    "split": "train",
+    "source": "leg_discriminating",
+    "review_status": "verified",
+    "rationale": "narrator-only query; lexical #1, vector #6, hybrid #1"
+  },
+  {
+    "id": 117,
+    "query": "julie brierley",
+    "gold_ids": [
+      94
+    ],
+    "query_class": "known_item",
+    "query_type": "keyword",
+    "difficulty": "hard",
+    "split": "holdout",
+    "source": "leg_discriminating",
+    "review_status": "verified",
+    "rationale": "narrator-only query; lexical #1, vector #40, hybrid #4"
+  },
+  {
+    "id": 118,
+    "query": "getting one percent better every day",
+    "gold_ids": [
+      66
+    ],
+    "query_class": "known_item",
+    "query_type": "semantic",
+    "difficulty": "hard",
+    "split": "train",
+    "source": "summary_content",
+    "review_status": "verified",
+    "rationale": "answer lives in the book's full summary, not the title/short blurb \u2014 tests full-text indexing"
+  },
+  {
+    "id": 119,
+    "query": "the cue routine reward habit loop",
+    "gold_ids": [
+      17
+    ],
+    "query_class": "known_item",
+    "query_type": "mixed",
+    "difficulty": "hard",
+    "split": "train",
+    "source": "summary_content",
+    "review_status": "verified",
+    "rationale": "answer lives in the book's full summary, not the title/short blurb \u2014 tests full-text indexing"
+  },
+  {
+    "id": 120,
+    "query": "keystone habits that ripple into other areas",
+    "gold_ids": [
+      17
+    ],
+    "query_class": "known_item",
+    "query_type": "mixed",
+    "difficulty": "hard",
+    "split": "holdout",
+    "source": "summary_content",
+    "review_status": "verified",
+    "rationale": "answer lives in the book's full summary, not the title/short blurb \u2014 tests full-text indexing"
+  },
+  {
+    "id": 121,
+    "query": "the stanford science of willpower course",
+    "gold_ids": [
+      2
+    ],
+    "query_class": "known_item",
+    "query_type": "mixed",
+    "difficulty": "hard",
+    "split": "train",
+    "source": "summary_content",
+    "review_status": "verified",
+    "rationale": "answer lives in the book's full summary, not the title/short blurb \u2014 tests full-text indexing"
+  },
+  {
+    "id": 122,
+    "query": "reversing type 2 diabetes through intermittent fasting",
+    "gold_ids": [
+      61
+    ],
+    "query_class": "known_item",
+    "query_type": "mixed",
+    "difficulty": "hard",
+    "split": "train",
+    "source": "summary_content",
+    "review_status": "verified",
+    "rationale": "answer lives in the book's full summary, not the title/short blurb \u2014 tests full-text indexing"
+  },
+  {
+    "id": 123,
+    "query": "leaders take total responsibility on the battlefield",
+    "gold_ids": [
+      46
+    ],
+    "query_class": "known_item",
+    "query_type": "semantic",
+    "difficulty": "hard",
+    "split": "holdout",
+    "source": "summary_content",
+    "review_status": "verified",
+    "rationale": "answer lives in the book's full summary, not the title/short blurb \u2014 tests full-text indexing"
+  },
+  {
+    "id": 124,
+    "query": "turning listeners into a paying audience as a speaker",
+    "gold_ids": [
+      73
+    ],
+    "query_class": "known_item",
+    "query_type": "semantic",
+    "difficulty": "hard",
+    "split": "train",
+    "source": "summary_content",
+    "review_status": "verified",
+    "rationale": "answer lives in the book's full summary, not the title/short blurb \u2014 tests full-text indexing"
+  }
+]

@@ -1,0 +1,16 @@
+# Dependencies for the hybrid-search engine (src/hybrid_search) + eval + UI.
+# Target: IBM Db2 12.1.5, Python 3.12, CPU-only.
+#
+# Install the project (which reads this file) in editable mode:
+#
+#   pip install -e .
+#
+# or just these packages directly:
+#
+#   pip install -r requirements.txt
+
+ibm_db==3.2.9              # Db2 driver (table load, model registration, vector + search)
+
+# --- demo UI, LIVE mode only (./ui/run.sh --live); the offline demo needs none of these ---
+fastapi==0.115.6           # live search API wrapper (ui/api.py)
+uvicorn==0.34.0            # ASGI server for the live API

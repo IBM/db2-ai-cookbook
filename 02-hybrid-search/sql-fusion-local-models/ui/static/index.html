@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shaikh's Audiobooks Search</title>
+  <link rel="stylesheet" href="styles.css?v=56" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">
+        <svg width="42" height="42" viewBox="0 0 32 32" fill="none">
+          <defs>
+            <linearGradient id="brandg" x1="2" y1="4" x2="30" y2="28" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#E8552B" />
+              <stop offset=".5" stop-color="#0E8F8F" />
+              <stop offset="1" stop-color="#6D54D6" />
+            </linearGradient>
+          </defs>
+          <path d="M7 19v-3a9 9 0 0 1 18 0v3" stroke="url(#brandg)" stroke-width="2" stroke-linecap="round" />
+          <rect x="4.4" y="18.4" width="5.2" height="8.2" rx="2.3" stroke="url(#brandg)" stroke-width="2" />
+          <rect x="22.4" y="18.4" width="5.2" height="8.2" rx="2.3" stroke="url(#brandg)" stroke-width="2" />
+        </svg>
+      </span>
+      <div class="brand-text">
+        <h1>Shaikh's Audiobooks Search</h1>
+        <p class="powered">powered by Db2&nbsp;12.1.5</p>
+        <p class="sub">Each retriever has a blind spot — hybrid covers both.</p>
+      </div>
+    </div>
+    <div class="legend" aria-label="color legend">
+      <span class="chip chip-bm25">Lexical</span>
+      <span class="chip chip-vector">Semantic</span>
+      <span class="chip chip-both">Hybrid</span>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="pages">
+    <button class="tab" data-page="start" role="tab" aria-selected="true">Start here</button>
+    <button class="tab" data-page="search" role="tab" aria-selected="false">Search</button>
+    <button class="tab" data-page="demo" role="tab" aria-selected="false">Demo</button>
+    <button class="tab" data-page="eval" role="tab" aria-selected="false">Golden eval set</button>
+    <button class="tab" data-page="arch" role="tab" aria-selected="false">Architecture</button>
+  </nav>
+
+  <!-- FIRST TAB (leftmost): the "Start here" doorway — the default landing. -->
+  <section class="startpage" id="page-start" aria-label="start here">
+    <div id="start-canvas"></div>
+  </section>
+
+  <main class="searchpage" id="page-search" hidden>
+    <div class="search-intro">
+      <h2>Search the library</h2>
+      <p>The top 5 results. Pick a mode — <b>Keyword</b>, <b>Hybrid</b>, or <b>Rerank</b> — for the full list, or tick any two under <b>Compare</b> to see them side by side.</p>
+    </div>
+    <div class="controls">
+      <input id="searchbox" type="text" placeholder="Search your library — type a query, then press Enter…"
+             autocomplete="off" spellcheck="false" aria-label="search the library" />
+      <div class="mode-switch" role="group" aria-label="search mode">
+        <button id="mode-keyword" class="seg seg-keyword" type="button" aria-pressed="false"
+          title="Keyword (BM25) search only"><span class="dot" aria-hidden="true"></span>Keyword</button>
+        <button id="mode-hybrid" class="seg seg-hybrid" type="button" aria-pressed="true"
+          title="Hybrid: keyword + semantic, fused"><span class="dot" aria-hidden="true"></span>Hybrid</button>
+        <button id="mode-rerank" class="seg seg-rerank" type="button" aria-pressed="false"
+          title="Hybrid, then reranked by a cross-encoder"><span class="dot" aria-hidden="true"></span>Rerank</button>
+      </div>
+    </div>
+    <div class="compare-row" role="group" aria-label="compare two strategies">
+      <span class="compare-label">Compare</span>
+      <label class="cmp-opt"><input type="checkbox" id="cmp-keyword" /><span class="dot bm25"></span>Keyword</label>
+      <label class="cmp-opt"><input type="checkbox" id="cmp-hybrid" /><span class="dot hyb"></span>Hybrid</label>
+      <label class="cmp-opt"><input type="checkbox" id="cmp-rerank" /><span class="dot rr"></span>Rerank</label>
+      <span class="compare-hint">tick any two → side by side</span>
+    </div>
+    <div id="output" class="output">
+      <p class="placeholder">Type a query and press Enter to see the top 5 results.</p>
+    </div>
+  </main>
+
+  <!-- SECOND PAGE: the golden eval set, explained for newcomers -->
+  <section class="evalpage" id="page-eval" hidden>
+    <div class="eval-intro">
+      <h2>Golden eval set</h2>
+      <p>The test questions behind the demo. Each has a <b>gold answer</b> — the book search should
+        return — used to grade the strategies (hit-rate, MRR).</p>
+    </div>
+    <div id="eval-list" class="eval-list"></div>
+  </section>
+
+  <!-- THIRD PAGE (additive): mixed-audience demo — "will search find my book?" -->
+  <section class="demopage" id="page-demo" hidden aria-label="will search find my book">
+    <div class="demo-intro">
+      <h2>Will search find my book?</h2>
+      <p>A rough memory of a book, run through three strategies at once. Each has a blind spot;
+        <b>Hybrid</b> covers them.</p>
+    </div>
+    <div class="demo-layout">
+      <aside class="demo-sidebar">
+        <div class="demo-sidebar-head">
+          <span class="demo-sidebar-title">Example queries</span>
+          <div class="demo-sidebar-actions">
+            <button id="demo-shuffle" class="demo-shuffle" type="button" aria-label="Shuffle the example queries">🔀 Shuffle</button>
+            <button id="demo-representative" class="demo-shuffle" type="button" aria-label="Load a representative set of eval queries">Representative set</button>
+          </div>
+        </div>
+        <div id="demo-chips" class="demo-chips" role="group" aria-label="example queries"></div>
+      </aside>
+      <div class="demo-main">
+        <div class="demo-controls">
+          <input id="demo-search" type="text" placeholder="Tap an example on the left" readonly
+                 autocomplete="off" spellcheck="false" aria-label="selected example query" />
+          <button id="demo-run" class="run">Search</button>
+          <label class="demo-toggle"><input type="checkbox" id="demo-tech" /> Technical details</label>
+        </div>
+        <div id="demo-scoreboard" class="demo-scoreboard" aria-live="polite"></div>
+        <p id="demo-scenario" class="demo-scenario" aria-live="polite"></p>
+        <div id="demo-panels" class="demo-panels">
+          <p class="placeholder">Tap an example query on the left to see all three strategies at once.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOURTH PAGE (additive): architecture, for a technical audience -->
+  <section class="archpage" id="page-arch" hidden aria-label="architecture">
+    <div class="arch-intro">
+      <h2>Architecture</h2>
+      <p>One Db2 database for retrieval + fusion, with a local model-serving layer. Pick a view.</p>
+    </div>
+    <div class="arch-subnav" id="arch-subnav" role="group" aria-label="architecture views">
+      <button type="button" data-view="component" aria-pressed="true">Components</button>
+      <button type="button" data-view="ingest" aria-pressed="false">Ingestion</button>
+      <button type="button" data-view="search" aria-pressed="false">Search</button>
+      <button type="button" data-view="sql" aria-pressed="false">SQL</button>
+    </div>
+    <div id="arch-canvas" class="arch-canvas"></div>
+  </section>
+
+  <script src="app.js?v=56"></script>
+  <script src="demo.js?v=56"></script>
+  <script src="arch.js?v=56"></script>
+  <script src="start.js?v=56"></script>
+</body>
+</html>

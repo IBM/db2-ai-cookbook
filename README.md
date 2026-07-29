@@ -18,13 +18,16 @@ Pick a module, pick a recipe inside it, follow the Quick start.
 | Module | What it covers | Recipes |
 |---|---|---|
 | [01-multimodal-embedding](01-multimodal-embedding/) | Turn images and text into vectors with three interchangeable embedding services — two self-hosted on CPU, one managed on AWS — and store the results in a Db2 `VECTOR` column for SQL similarity search. Both modalities land in the same vector space, so you can embed a text query and rank images against it. | 3 |
-| [02-rag](02-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Parse a PDF into structured chunks, embed and store them, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts — citing the page and section each came from. Runs entirely on your own machine. | 1 |
+| [02-hybrid-search](02-hybrid-search/) | Find the right rows by combining keyword search and semantic search. Db2 Text Search gives the BM25 leg, native `VECTOR` columns with in-database `TO_EMBEDDING` give the semantic one, and a single SQL query fuses both rankings so each covers the other's blind spot. Ships a demo UI and a 118-query eval harness, so a change to the fusion is something you can measure. | 1 |
+| [03-rag](03-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Parse a PDF into structured chunks, embed and store them, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts — citing the page and section each came from. Runs entirely on your own machine. | 1 |
 
 More modules are on the way. See [Adding a module](#adding-a-module) below.
 
 ## Prerequisites
 
 Most recipes that persist vectors need **Db2 ≥ 12.1.2** (where the `VECTOR` type lands) with the `SAMPLE` database, reachable either locally (run as the instance owner) or over TCP/IP (`DB2COMM=TCPIP`, default port `50000`). Recipes that only compute embeddings and hand them back need no Db2 at all.
+
+One module asks for more: [02-hybrid-search](02-hybrid-search/) needs **Db2 12.1.5** plus OpenSearch, because it uses Db2 Text Search and in-database `TO_EMBEDDING` rather than just the `VECTOR` type.
 
 Anything host-specific — OS package fixes, model downloads, build-from-source paths — lives in the relevant module or recipe README, not here.
 
@@ -37,7 +40,10 @@ db2-ai-cookbook/
 │   ├── vllm-vlm2vec-image-embed/
 │   ├── bedrock-titan-image-embed/
 │   └── README.md
-├── 02-rag/                       # documents → chunks → Db2 VECTOR → grounded answers
+├── 02-hybrid-search/             # BM25 + vector, fused in one Db2 SQL query
+│   ├── sql-fusion-local-models/
+│   └── README.md
+├── 03-rag/                       # documents → chunks → Db2 VECTOR → grounded answers
 │   ├── haystack-local-models/
 │   └── README.md
 ├── LICENSE
@@ -58,8 +64,12 @@ Don't repeat what the path already says. A module folder names the **capability*
 
 ```
 01-multimodal-embedding/infinity-jina-clip-v2      engine + model
-02-rag/haystack-local-models                       framework + model hosting
+02-hybrid-search/sql-fusion-local-models           approach + model hosting
+03-rag/haystack-local-models                       framework + model hosting
 ```
+
+Modules are numbered in reading order — each builds on the one before it. Inserting a module
+means renumbering the ones after it, which is cheap and worth doing.
 
 ### Recipe README shape
 

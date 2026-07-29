@@ -1,0 +1,15 @@
+{
+  "note": "Fill my_memory_queries with queries only you can write from personal memory of these books. Same schema as golden_set; set source='gold', review_status='needs_review'.",
+  "schema_example": {
+    "id": 1,
+    "query": "",
+    "query_type": "keyword|semantic|mixed",
+    "query_class": "known_item|topical",
+    "difficulty": "easy|hard",
+    "gold_ids": [],
+    "rationale": "",
+    "source": "gold",
+    "review_status": "needs_review"
+  },
+  "my_memory_queries": []
+}
