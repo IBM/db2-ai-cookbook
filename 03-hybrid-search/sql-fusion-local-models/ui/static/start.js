@@ -53,7 +53,8 @@ function startView() {
               <div class="ba-label">after &middot; hybrid</div>
               <div class="ba-found">
                 <img class="ba-cover" src="covers/B07GBGQJSW.jpg" loading="lazy"
-                     alt="Atomic Habits — cover" />
+                     alt="Atomic Habits — cover"
+                     onerror="this.style.display='none'" />
                 <div class="ba-found-meta">
                   <div class="ba-title">${HP} Atomic Habits</div>
                   <div class="ba-by">James Clear</div>
