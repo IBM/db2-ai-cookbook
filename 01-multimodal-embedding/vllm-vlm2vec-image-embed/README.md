@@ -104,7 +104,7 @@ The endpoint is OpenAI-compatible with one twist: OpenAI has **no** image-embedd
 
 ## Storing the result in Db2
 
-After printing the vector, the script persists the **image** (`BLOB`) and its **embedding** (native Db2 `VECTOR`) in one row. VLM2Vec is 3072-dim, so this module uses its **own table**, separate from the [Bedrock module's](../bedrock-titan-image-embed/README.md) 1024-dim `image_embeddings` (a `VECTOR` column is fixed-width — the two can't share a table).
+After printing the vector, the script persists the **image** (`BLOB`) and its **embedding** (native Db2 `VECTOR`) in one row. VLM2Vec is 3072-dim, so this recipe uses its **own table**, separate from the [Bedrock recipe's](../bedrock-titan-image-embed/README.md) 1024-dim `image_embeddings` (a `VECTOR` column is fixed-width — the two can't share a table).
 
 ```sql
 CREATE TABLE IF NOT EXISTS image_embeddings_vlm2vec (
@@ -118,7 +118,7 @@ INSERT INTO image_embeddings_vlm2vec (filename, image, embedding)
 VALUES (?, ?, VECTOR(CAST(? AS CLOB(1M)), 3072, FLOAT32));
 ```
 
-> **Why `CAST(? AS CLOB(1M))`:** a 3072-float JSON string is ~40 KB, which overflows Db2's ~32 KB `VARCHAR` limit. Casting to a `CLOB` lets the full vector through. (The Bedrock module's 1024-dim vector is ~13 KB, fits a plain `VARCHAR`, and skips the cast.)
+> **Why `CAST(? AS CLOB(1M))`:** a 3072-float JSON string is ~40 KB, which overflows Db2's ~32 KB `VARCHAR` limit. Casting to a `CLOB` lets the full vector through. (The Bedrock recipe's 1024-dim vector is ~13 KB, fits a plain `VARCHAR`, and skips the cast.)
 
 Nearest images to row `1` by cosine distance (0 = identical):
 
@@ -149,7 +149,7 @@ Both default to `localhost` / local-trusted, so on the Db2 host you can skip `.e
 
 ## Design notes
 
-- **CLOB cast for the vector** — required at 3072-dim (see above); the Bedrock module doesn't need it at 1024-dim.
+- **CLOB cast for the vector** — required at 3072-dim (see above); the Bedrock recipe doesn't need it at 1024-dim.
 - **BLOB bound as `SQL_BLOB`** — a JPEG has null bytes; a plain-string bind would truncate it. Stored length matches the file byte-for-byte.
 - **`.env`-driven connection + URL** — one code path runs locally or remotely, chosen at runtime by `DB2_HOSTNAME` / `VLLM_URL`.
 - **Image read once, reused** — base64 for the server, raw bytes for the BLOB. Re-running **appends** a row (no dedupe).
@@ -180,14 +180,14 @@ A Linux x86_64 host with `sudo`, `git`, and `curl`, plus **Python 3.12** (vLLM 0
 python3.12 --version || sudo dnf install -y python3.12
 ```
 
-### 1. Clone the repo and enter this module
+### 1. Clone the repo and enter this recipe
 
 ```bash
-git clone https://github.com/IBM/db2-multimodal-embedding.git
-cd db2-multimodal-embedding/vllm-vlm2vec-image-embed
+git clone https://github.com/IBM/db2-ai-cookbook.git
+cd db2-ai-cookbook/01-multimodal-embedding/vllm-vlm2vec-image-embed
 ```
 
-### 2. Create the module's virtualenv
+### 2. Create the recipe's virtualenv
 
 ```bash
 python3.12 -m venv .venv
@@ -236,10 +236,10 @@ pip install . --no-build-isolation
 
 ### 7. Verify the kernels load
 
-Run this **from the module folder, not `/tmp/vllm-build`** — inside the build dir its `vllm/` source subfolder shadows the installed package and you'll get a misleading `ModuleNotFoundError`:
+Run this **from the recipe folder, not `/tmp/vllm-build`** — inside the build dir its `vllm/` source subfolder shadows the installed package and you'll get a misleading `ModuleNotFoundError`:
 
 ```bash
-cd ~/db2-multimodal-embedding/vllm-vlm2vec-image-embed
+cd ~/db2-ai-cookbook/01-multimodal-embedding/vllm-vlm2vec-image-embed
 python3 -c "import vllm._C; print('vllm._C OK')"
 python3 -c "import torch; print(torch.__version__)"     # -> 2.11.0+cpu
 ```

@@ -108,7 +108,7 @@ Infinity's endpoint matches OpenAI's text-embeddings API: same path (`/embedding
 
 Deliberately omitted: auth, TLS, client-side batching, error handling/retries, GPU support, and **any vector storage**. To go further:
 
-- Persist the vectors — e.g. a Db2 `VECTOR` column (as the [vLLM](../vllm-vlm2vec-image-embed/README.md) and [Bedrock](../bedrock-titan-image-embed/README.md) modules do) or a library like FAISS
+- Persist the vectors — e.g. a Db2 `VECTOR` column (as the [vLLM](../vllm-vlm2vec-image-embed/README.md) and [Bedrock](../bedrock-titan-image-embed/README.md) recipes do) or a library like FAISS
 - Embed a text query and rank images against it (shared space)
 - Move to a GPU host for lower latency
 
@@ -144,7 +144,7 @@ If `dnf update` reports nothing to do, check whether an old SQLite is being inje
 ### Build the venv from scratch
 
 ```bash
-mkdir -p ~/db2-multimodal-embedding/infinity-jina-clip-v2 && cd ~/db2-multimodal-embedding/infinity-jina-clip-v2
+mkdir -p ~/db2-ai-cookbook/01-multimodal-embedding/infinity-jina-clip-v2 && cd ~/db2-ai-cookbook/01-multimodal-embedding/infinity-jina-clip-v2
 python3 -m venv .venv && source .venv/bin/activate
 pip install -U pip
 pip install -r requirements.txt
