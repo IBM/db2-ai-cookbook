@@ -32,6 +32,7 @@ Pick a module, pick a recipe inside it, follow the Quick start.
 | [03-hybrid-search](03-hybrid-search/) | Find the right rows by combining keyword search and semantic search. Db2 Text Search gives the BM25 leg, native `VECTOR` columns with in-database `TO_EMBEDDING` give the semantic one, and a single SQL query fuses both rankings so each covers the other's blind spot. Ships a demo UI and a 118-query eval harness, so a change to the fusion is something you can measure. | Python + OpenSearch, Db2 12.1.5 | 1 |
 | [04-rag](04-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Chunk a source document, embed and store the chunks, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts alone. Three recipes solve this different ways — Haystack over a PDF, LangChain over a web article, and one with no framework at all that calls a hosted watsonx.ai model — so you can see which parts of a RAG pipeline are essential and which are framework flavour. | Python + local models | 3 |
 | [05-agentic-rag](05-agentic-rag/) | RAG that checks its own work. A LangGraph agent grades the documents it retrieved, and when they don't answer the question it rewrites the query and retries rather than answering from bad context. Shows the pipeline twice — once as a notebook prototype, then split into three FastAPI microservices behind a gateway, which is the step most RAG tutorials skip. | Python + local models | 1 |
+| [06-recommendation](06-recommendation/) | Item-to-item recommendation: "find me something like this one — that I can actually get". Product attributes become a vector, `VECTOR_DISTANCE` ranks the catalogue, and store, size and stock filter it in the same statement — because a recommendation nobody can buy is worthless. | Python + watsonx.ai | 1 |
 
 More modules are on the way. See [Adding a module](#adding-a-module) below.
 
@@ -69,6 +70,9 @@ db2-ai-cookbook/
 ├── 05-agentic-rag/               # RAG that grades its own retrieval and retries
 │   ├── langgraph-local-models/
 │   └── README.md
+├── 06-recommendation/            # similar products, filtered by what's in stock
+│   ├── shoe-search-watsonx/
+│   └── README.md
 ├── LICENSE
 └── README.md                     # you are here
 ```
@@ -88,6 +92,7 @@ Don't repeat what the path already says. A module folder names the **capability*
 ```
 01-tabular-search/pure-sql                         approach (no framework at all)
 01-tabular-search/python-watsonx                   language + model hosting
+06-recommendation/shoe-search-watsonx              use case + model hosting
 02-multimodal-embedding/infinity-jina-clip-v2      engine + model
 03-hybrid-search/sql-fusion-local-models           approach + model hosting
 04-rag/haystack-local-models                       framework + model hosting
