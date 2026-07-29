@@ -33,9 +33,12 @@ flowchart LR
 | [haystack-local-models](haystack-local-models/) | [Haystack](https://haystack.deepset.ai/) pipelines | a **PDF**, parsed by [Docling](https://github.com/docling-project/docling) | `HybridChunker`, on section boundaries | via [llama.cpp](https://github.com/ggml-org/llama.cpp), OpenAI-compatible API · 384-d | Python scripts |
 | [langchain-local-models](langchain-local-models/) | [LangChain](https://python.langchain.com/) + the `langchain-db2` connector | a **web article**, extracted by [trafilatura](https://trafilatura.readthedocs.io/) | spaCy sentences, 200 words / 50 overlap | Granite 30M + Qwen2.5 3B via `LlamaCpp` · 384-d | Jupyter notebook |
 | [plain-python-watsonx](plain-python-watsonx/) | **none** — plain Python over raw SQL | a **blog post**, extracted by [trafilatura](https://trafilatura.readthedocs.io/) | spaCy, sentence-aware with overlap | Granite 30M local; answers from **hosted watsonx.ai** | Jupyter notebook |
+| [autoai-watsonx](autoai-watsonx/) | **watsonx.ai AutoAI RAG** chooses the pattern | **Db2 ML articles**, loaded from COS | whatever AutoAI selects — that is the point | selected by AutoAI, hosted on watsonx.ai · 1024-d | Jupyter notebook |
 
 The first two run entirely on your own machine — no API keys, no cloud, no per-call cost. The
-third keeps embeddings local but calls a hosted model to write the answer.
+third keeps embeddings local but calls a hosted model to write the answer. The fourth is fully
+hosted and additionally needs an IBM Cloud Object Storage bucket, but it is the only one that
+**measures** its retrieval quality rather than assuming it.
 
 ### Which one should I use?
 

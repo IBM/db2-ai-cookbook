@@ -1,0 +1,16 @@
+[
+    {
+        "question": "What is path to ModelInference class?",
+        "correct_answer": "ibm_watsonx_ai.foundation_models.inference.ModelInference",
+        "correct_answer_document_ids": [
+            "ModelInference.txt"
+        ]
+    },
+    {
+        "question": "What is method for get model inferance details?",
+        "correct_answer": "get_details()",
+        "correct_answer_document_ids": [
+            "ModelInference.txt"
+        ]
+    }
+]
