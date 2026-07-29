@@ -121,7 +121,7 @@ Because Titan shares an image/text space, you can also embed a **text** query (`
 
 ## Running remotely from the Db2 host
 
-Bedrock is a cloud API, so the only thing tying this module to the Db2 machine is the database connection. To run the script on a **different** host, add Db2 details to `.env` — no code change:
+Bedrock is a cloud API, so the only thing tying this recipe to the Db2 machine is the database connection. To run the script on a **different** host, add Db2 details to `.env` — no code change:
 
 ```ini
 DB2_HOSTNAME=db2host.example.com   # presence of this switches to a remote TCP connection
@@ -165,8 +165,8 @@ Deliberately omitted to stay minimal: error handling/retries, request batching, 
 
 ```bash
 # 1. Get the code
-git clone https://github.com/IBM/db2-multimodal-embedding.git
-cd db2-multimodal-embedding/bedrock-titan-image-embed
+git clone https://github.com/IBM/db2-ai-cookbook.git
+cd db2-ai-cookbook/01-multimodal-embedding/bedrock-titan-image-embed
 
 # 2. Install the client (no model download, no compiler, no server)
 python3.12 -m venv .venv && source .venv/bin/activate

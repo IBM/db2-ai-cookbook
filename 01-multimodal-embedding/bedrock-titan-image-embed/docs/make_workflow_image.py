@@ -164,7 +164,7 @@ ax.text((cx0 + cx1) / 2, (cyb + cyt) / 2 - 0.26,
         ha="center", va="center", fontsize=12.5, color=INK, fontweight="bold", zorder=3)
 
 # ---- footer -----------------------------------------------------------------
-ax.text(W / 2, 0.58, "github.com/IBM/db2-multimodal-embedding", ha="center", va="center",
+ax.text(W / 2, 0.58, "github.com/IBM/db2-ai-cookbook", ha="center", va="center",
         fontsize=11.5, color=DB2_C, fontweight="bold")
 
 out = "docs/workflow_linkedin.png"

@@ -1,99 +1,63 @@
-# db2-multimodal-embedding
+# Db2 AI Cookbook
 
-> A hands-on tutorial for Db2 users: turn images (and text) into vectors with three interchangeable embedding services — two self-hosted on CPU, one managed on AWS — and store the results in a Db2 `VECTOR` column for SQL similarity search.
+> Practical, runnable recipes for building AI features on IBM Db2 — embeddings, vector search, and the surrounding plumbing. Every recipe is minimal by design, so the moving parts stay visible.
 
+![Db2](https://img.shields.io/badge/Db2-12.1%2B-054ada)
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
-![Platform](https://img.shields.io/badge/host-CPU--only%20·%20RHEL%209.6-lightgrey)
-![Db2](https://img.shields.io/badge/store-Db2%2012.1%20VECTOR-054ada)
 ![Status](https://img.shields.io/badge/purpose-learning%20%2F%20reference-success)
 
-Each subfolder is a **self-contained module** — its own engine, virtualenv, README, and `.env`. Pick one, follow its Quick start, and you'll go from an image to a stored, queryable embedding. The code is deliberately minimal so the moving parts stay visible.
+The cookbook is organised in two levels:
 
-```mermaid
-flowchart LR
-    IN["image / text"] --> ENGINE
-    subgraph ENGINE["embedding engine (pick one)"]
-      direction TB
-      M1["Infinity + jina-clip-v2<br/>1024-d · CPU"]
-      M2["vLLM + VLM2Vec-Full<br/>3072-d · CPU"]
-      M3["AWS Bedrock + Titan<br/>1024-d · managed"]
-    end
-    ENGINE --> VEC["embedding vector"]
-    VEC -->|"vLLM + Bedrock modules"| DB[("Db2 SAMPLE<br/>BLOB + VECTOR")]
-    DB --> Q["VECTOR_DISTANCE<br/>similarity search"]
-    VEC -.->|"Infinity module"| CALLER["returned to caller<br/>(no Db2)"]
-```
+- A **module** is a topic — one AI capability applied to Db2.
+- A **recipe** is one concrete, self-contained way to do it — its own engine, virtualenv, README, and `.env`.
+
+Pick a module, pick a recipe inside it, follow the Quick start.
 
 ## Modules
 
-| Module | Engine | Model | Dim | Image input | Db2 storage | Install |
-|---|---|---|---|---|---|---|
-| [infinity-jina-clip-v2](infinity-jina-clip-v2/) | Infinity (torch, CPU) | `jinaai/jina-clip-v2` | 1024 | image **URL** | — | `pip install` (pinned) |
-| [vllm-vlm2vec-image-embed](vllm-vlm2vec-image-embed/) | vLLM (CPU) | `TIGER-Lab/VLM2Vec-Full` | 3072 | base64 data URL | `image_embeddings_vlm2vec` | source build¹ |
-| [bedrock-titan-image-embed](bedrock-titan-image-embed/) | AWS Bedrock (managed) | `amazon.titan-embed-image-v1` | 1024 | raw base64 | `image_embeddings` | `pip install boto3` |
+| Module | What it covers | Recipes |
+|---|---|---|
+| [01-multimodal-embedding](01-multimodal-embedding/) | Turn images and text into vectors with three interchangeable embedding services — two self-hosted on CPU, one managed on AWS — and store the results in a Db2 `VECTOR` column for SQL similarity search. Both modalities land in the same vector space, so you can embed a text query and rank images against it. | 3 |
 
-¹ This host is AVX2-only with glibc 2.34, so vLLM had no installable CPU wheel and was built from source. On an AVX-512 host with glibc ≥ 2.35, a plain `pip install` works — see that module's appendix.
+More modules are on the way. See [Adding a module](#adding-a-module) below.
 
-All three place images **and** text in the same vector space, so you can embed a text query and rank images against it.
+## Prerequisites
 
-## Which one should I use?
+Most recipes that persist vectors need **Db2 ≥ 12.1.2** (where the `VECTOR` type lands) with the `SAMPLE` database, reachable either locally (run as the instance owner) or over TCP/IP (`DB2COMM=TCPIP`, default port `50000`). Recipes that only compute embeddings and hand them back need no Db2 at all.
 
-| If you want… | Use |
-|---|---|
-| The lightest, fastest local path — ~900 MB model, ~2.5 s warm, embeds image URLs directly | **infinity-jina-clip-v2** |
-| A from-scratch vLLM walkthrough — ~8 GB model, base64 images, 3072-d, persisted to Db2 | **vllm-vlm2vec-image-embed** |
-| No local model or GPU — a managed API (pay per request), persisted to Db2, runnable from anywhere | **bedrock-titan-image-embed** |
-
-## Quick start
-
-Each module has a copy-pasteable Quick start in its own README — start there:
-
-- **[infinity-jina-clip-v2 →](infinity-jina-clip-v2/README.md#quick-start)**
-- **[vllm-vlm2vec-image-embed →](vllm-vlm2vec-image-embed/README.md#run-it)**
-- **[bedrock-titan-image-embed →](bedrock-titan-image-embed/README.md#quick-start)**
-
-## Storing & searching vectors in Db2
-
-The vLLM and Bedrock modules persist each result as one row — the original image in a `BLOB`, the embedding in a native Db2 **`VECTOR`** column — so nearest-neighbour search is plain SQL:
-
-```sql
-SELECT filename,
-       VECTOR_DISTANCE(embedding, (SELECT embedding FROM image_embeddings WHERE id = 1), COSINE) AS distance
-FROM image_embeddings
-ORDER BY distance
-FETCH FIRST 5 ROWS ONLY;
-```
-
-`VECTOR` columns are fixed-width, so each model gets its **own table** (1024-d and 3072-d vectors can't share one). Both modules read their Db2 connection from `.env`: unset `DB2_HOSTNAME` for a passwordless local connection on the Db2 host, or set it (with `DB2_UID`/`DB2_PWD`) to run on a **remote** host over TCP. Requires Db2 **≥ 12.1.2** (where the `VECTOR` type lands) with the `SAMPLE` database.
-
-## Shared prerequisites
-
-### Db2 (for the storage step)
-A Db2 ≥ 12.1.2 instance with the `SAMPLE` database, reachable either locally (run as the instance owner) or over TCP/IP (`DB2COMM=TCPIP`, default port `50000`). The infinity module has no storage step and needs no Db2.
-
-### Fix system SQLite — RHEL 9.6 only, one-time, sudo
-On a fresh RHEL 9.6 image, `import sqlite3` is broken system-wide for Python 3.12: the stock `sqlite-libs-3.34.1-9.el9_7` doesn't export `sqlite3_deserialize`, which the `python3.12-libs` (el9_8) `_sqlite3` extension requires. The Infinity module imports `sqlite3` at startup and crashes without this fix:
-
-```bash
-sudo dnf update -y sqlite-libs        # 3.34.1-9.el9_7 -> 3.34.1-10.el9_8
-python3 -c "import sqlite3; print('sqlite3 OK', sqlite3.sqlite_version)"
-```
-
-If `dnf update` reports nothing to do, check whether an old SQLite is being injected via `LD_LIBRARY_PATH` (e.g. a Db2 `sqllib/lib64`) ahead of `/lib64`.
+Anything host-specific — OS package fixes, model downloads, build-from-source paths — lives in the relevant module or recipe README, not here.
 
 ## Repository layout
 
 ```
-db2-multimodal-embedding/
-├── infinity-jina-clip-v2/        # Infinity + jina-clip-v2 (1024-d, CPU, URL input)
-├── vllm-vlm2vec-image-embed/     # vLLM + VLM2Vec-Full (3072-d, CPU) → Db2
-├── bedrock-titan-image-embed/    # AWS Bedrock Titan (1024-d, managed) → Db2
+db2-ai-cookbook/
+├── 01-multimodal-embedding/      # images + text → vectors → Db2 VECTOR
+│   ├── infinity-jina-clip-v2/
+│   ├── vllm-vlm2vec-image-embed/
+│   ├── bedrock-titan-image-embed/
+│   └── README.md
+├── LICENSE
 └── README.md                     # you are here
 ```
 
-## Conventions for new modules
+Modules are numbered so they sort in a deliberate reading order; the number is part of the folder name, not a strict sequence you must follow.
 
-- One subfolder per engine/model combo, with its own `.venv` and pinned `requirements.txt` — these stacks bit-rot quickly against current PyPI.
-- A `README.md` per module: one-line opener, Quick start, expected output, then concepts; host-specific setup and troubleshooting in an appendix.
-- Secrets and host-specific config in a gitignored `.env` (commit a `.env.example`); never hardcode credentials.
-- Give each module a distinct port so several can run side by side.
+## Adding a module
+
+1. Create a numbered folder (`02-…`) with a `README.md` that opens with a one-line description, then lists its recipes in a table.
+2. Add a row to the [Modules](#modules) table above.
+3. Put each recipe in its own subfolder — one per engine/model combo, with its own `.venv` and **pinned** `requirements.txt`. These stacks bit-rot quickly against current PyPI.
+
+### Recipe README shape
+
+One-line opener → Quick start → expected output → concepts. Host-specific setup and troubleshooting go in an appendix at the end, so the happy path stays short.
+
+### Conventions
+
+- Secrets and host-specific config in a gitignored `.env`; commit a `.env.example` alongside it. Never hardcode credentials.
+- Give each recipe that runs a server a distinct port, so several can run side by side.
+- Keep the code minimal. A recipe is a teaching artifact, not a library.
+
+## License
+
+[Apache 2.0](LICENSE)
