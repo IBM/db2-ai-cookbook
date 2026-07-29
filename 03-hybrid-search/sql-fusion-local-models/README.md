@@ -383,6 +383,17 @@ pip install -e .
 > The headless UI test needs Playwright + Chromium:
 > `pip install playwright` then `python -m playwright install chromium`.
 
+**Fetch the cover thumbnails.** They are *not* committed — they are retailer artwork, so the
+repository ships only the ASINs and this script pulls the images:
+
+```bash
+python scripts/fetch_covers.py
+```
+
+Downloads one ~7 KB thumbnail per book into `ui/static/covers/` and fills the `cover_url` column
+in `data/corpus.csv`. Stdlib only, idempotent, safe to re-run. Skip it and everything still works
+— the Search and Demo tabs simply show no artwork.
+
 ---
 
 ### Step 7 — Configure `.env`

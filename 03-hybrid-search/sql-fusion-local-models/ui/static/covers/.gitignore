@@ -1,0 +1,3 @@
+# Cover thumbnails are fetched at setup, not committed — they are retailer artwork.
+# Run: python scripts/fetch_covers.py
+*.jpg
