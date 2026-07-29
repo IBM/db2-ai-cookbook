@@ -19,8 +19,7 @@ Pick a module, pick a recipe inside it, follow the Quick start.
 |---|---|---|
 | [01-multimodal-embedding](01-multimodal-embedding/) | Turn images and text into vectors with three interchangeable embedding services — two self-hosted on CPU, one managed on AWS — and store the results in a Db2 `VECTOR` column for SQL similarity search. Both modalities land in the same vector space, so you can embed a text query and rank images against it. | 3 |
 | [02-hybrid-search](02-hybrid-search/) | Find the right rows by combining keyword search and semantic search. Db2 Text Search gives the BM25 leg, native `VECTOR` columns with in-database `TO_EMBEDDING` give the semantic one, and a single SQL query fuses both rankings so each covers the other's blind spot. Ships a demo UI and a 118-query eval harness, so a change to the fusion is something you can measure. | 1 |
-| [03-rag](03-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Chunk a source document, embed and store the chunks, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts alone. Two recipes solve this with different frameworks — Haystack over a PDF, LangChain over a web article — so you can see which parts of a RAG pipeline are essential and which are framework flavour. Runs entirely on your own machine. | 2 |
-
+| [03-rag](03-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Chunk a source document, embed and store the chunks, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts alone. Three recipes solve this different ways — Haystack over a PDF, LangChain over a web article, and one with no framework at all that calls a hosted watsonx.ai model — so you can see which parts of a RAG pipeline are essential and which are framework flavour. | 3 |
 | [04-agentic-rag](04-agentic-rag/) | RAG that checks its own work. A LangGraph agent grades the documents it retrieved, and when they don't answer the question it rewrites the query and retries rather than answering from bad context. Shows the pipeline twice — once as a notebook prototype, then split into three FastAPI microservices behind a gateway, which is the step most RAG tutorials skip. | 1 |
 
 More modules are on the way. See [Adding a module](#adding-a-module) below.
@@ -48,6 +47,7 @@ db2-ai-cookbook/
 ├── 03-rag/                       # documents → chunks → Db2 VECTOR → grounded answers
 │   ├── haystack-local-models/
 │   ├── langchain-local-models/
+│   ├── plain-python-watsonx/
 │   └── README.md
 ├── 04-agentic-rag/               # RAG that grades its own retrieval and retries
 │   ├── langgraph-local-models/
@@ -60,7 +60,7 @@ Modules are numbered so they sort in a deliberate reading order; the number is p
 
 ## Adding a module
 
-1. Create a numbered folder (`03-…`) with a `README.md` that opens with a one-line description, then lists its recipes in a table.
+1. Create a numbered folder (`05-…`) with a `README.md` that opens with a one-line description, then lists its recipes in a table.
 2. Add a row to the [Modules](#modules) table above.
 3. Put each recipe in its own subfolder — one per engine/model combo, with its own `.venv` and **pinned** `requirements.txt`. These stacks bit-rot quickly against current PyPI.
 

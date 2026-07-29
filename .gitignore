@@ -8,6 +8,9 @@
 *.pem
 *credentials*
 *secret*
+# The Db2 Jupyter magic (%sql CONNECT CREDENTIALS) caches credentials to a pickle
+# next to the notebook. A rule covering only .env lets that copy through.
+*.pickle
 
 # Python virtual environments — multi-GB and machine-specific (absolute paths baked in)
 .venv/
