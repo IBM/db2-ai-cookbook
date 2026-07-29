@@ -15,13 +15,23 @@ Pick a module, pick a recipe inside it, follow the Quick start.
 
 ## Modules
 
-| Module | What it covers | Recipes |
-|---|---|---|
-| [01-tabular-search](01-tabular-search/) | Similarity search over the rows of an ordinary table. Give each row a vector, and `VECTOR_DISTANCE` ranks rows by closeness — while a normal `WHERE` clause filters on ordinary columns in the same statement, which is the part a standalone vector store cannot do. The simplest module in the cookbook: pure SQL, no Python, and on Db2 12.1's `SAMPLE` database the demo table already exists, so it runs with zero setup. | 1 |
-| [02-multimodal-embedding](02-multimodal-embedding/) | Turn images and text into vectors with three interchangeable embedding services — two self-hosted on CPU, one managed on AWS — and store the results in a Db2 `VECTOR` column for SQL similarity search. Both modalities land in the same vector space, so you can embed a text query and rank images against it. | 3 |
-| [03-hybrid-search](03-hybrid-search/) | Find the right rows by combining keyword search and semantic search. Db2 Text Search gives the BM25 leg, native `VECTOR` columns with in-database `TO_EMBEDDING` give the semantic one, and a single SQL query fuses both rankings so each covers the other's blind spot. Ships a demo UI and a 118-query eval harness, so a change to the fusion is something you can measure. | 1 |
-| [04-rag](04-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Chunk a source document, embed and store the chunks, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts alone. Three recipes solve this different ways — Haystack over a PDF, LangChain over a web article, and one with no framework at all that calls a hosted watsonx.ai model — so you can see which parts of a RAG pipeline are essential and which are framework flavour. | 3 |
-| [05-agentic-rag](05-agentic-rag/) | RAG that checks its own work. A LangGraph agent grades the documents it retrieved, and when they don't answer the question it rewrites the query and retries rather than answering from bad context. Shows the pipeline twice — once as a notebook prototype, then split into three FastAPI microservices behind a gateway, which is the step most RAG tutorials skip. | 1 |
+**Not sure where to start?**
+
+- **Shortest path to working code** → [01-tabular-search](01-tabular-search/). Pure SQL, three
+  commands, nothing to install.
+- **Here for RAG** → [04-rag](04-rag/). It stands alone; you do not need the modules before it.
+- **Building search** → [01-tabular-search](01-tabular-search/), then
+  [03-hybrid-search](03-hybrid-search/).
+- **Reading straight through** → start at 01. Each module assumes only what the earlier ones
+  introduced.
+
+| Module | What it covers | Needs | Recipes |
+|---|---|---|---|
+| [01-tabular-search](01-tabular-search/) | Similarity search over the rows of an ordinary table. Give each row a vector, and `VECTOR_DISTANCE` ranks rows by closeness — while a normal `WHERE` clause filters on ordinary columns in the same statement, which is the part a standalone vector store cannot do. The simplest module in the cookbook: pure SQL, no Python, and on Db2 12.1's `SAMPLE` database the demo table already exists, so it runs with zero setup. | SQL only | 1 |
+| [02-multimodal-embedding](02-multimodal-embedding/) | Turn images and text into vectors with three interchangeable embedding services — two self-hosted on CPU, one managed on AWS — and store the results in a Db2 `VECTOR` column for SQL similarity search. Both modalities land in the same vector space, so you can embed a text query and rank images against it. | Python + models (one uses AWS) | 3 |
+| [03-hybrid-search](03-hybrid-search/) | Find the right rows by combining keyword search and semantic search. Db2 Text Search gives the BM25 leg, native `VECTOR` columns with in-database `TO_EMBEDDING` give the semantic one, and a single SQL query fuses both rankings so each covers the other's blind spot. Ships a demo UI and a 118-query eval harness, so a change to the fusion is something you can measure. | Python + OpenSearch, Db2 12.1.5 | 1 |
+| [04-rag](04-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Chunk a source document, embed and store the chunks, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts alone. Three recipes solve this different ways — Haystack over a PDF, LangChain over a web article, and one with no framework at all that calls a hosted watsonx.ai model — so you can see which parts of a RAG pipeline are essential and which are framework flavour. | Python + local models | 3 |
+| [05-agentic-rag](05-agentic-rag/) | RAG that checks its own work. A LangGraph agent grades the documents it retrieved, and when they don't answer the question it rewrites the query and retries rather than answering from bad context. Shows the pipeline twice — once as a notebook prototype, then split into three FastAPI microservices behind a gateway, which is the step most RAG tutorials skip. | Python + local models | 1 |
 
 More modules are on the way. See [Adding a module](#adding-a-module) below.
 
