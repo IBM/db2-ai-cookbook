@@ -19,7 +19,7 @@ Pick a module, pick a recipe inside it, follow the Quick start.
 |---|---|---|
 | [01-multimodal-embedding](01-multimodal-embedding/) | Turn images and text into vectors with three interchangeable embedding services — two self-hosted on CPU, one managed on AWS — and store the results in a Db2 `VECTOR` column for SQL similarity search. Both modalities land in the same vector space, so you can embed a text query and rank images against it. | 3 |
 | [02-hybrid-search](02-hybrid-search/) | Find the right rows by combining keyword search and semantic search. Db2 Text Search gives the BM25 leg, native `VECTOR` columns with in-database `TO_EMBEDDING` give the semantic one, and a single SQL query fuses both rankings so each covers the other's blind spot. Ships a demo UI and a 118-query eval harness, so a change to the fusion is something you can measure. | 1 |
-| [03-rag](03-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Parse a PDF into structured chunks, embed and store them, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts — citing the page and section each came from. Runs entirely on your own machine. | 1 |
+| [03-rag](03-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Chunk a source document, embed and store the chunks, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts alone. Two recipes solve this with different frameworks — Haystack over a PDF, LangChain over a web article — so you can see which parts of a RAG pipeline are essential and which are framework flavour. Runs entirely on your own machine. | 2 |
 
 More modules are on the way. See [Adding a module](#adding-a-module) below.
 
@@ -45,6 +45,7 @@ db2-ai-cookbook/
 │   └── README.md
 ├── 03-rag/                       # documents → chunks → Db2 VECTOR → grounded answers
 │   ├── haystack-local-models/
+│   ├── langchain-local-models/
 │   └── README.md
 ├── LICENSE
 └── README.md                     # you are here
