@@ -1,5 +1,6 @@
 # Pinned: these versions resolve and import together (checked 2026-07-29).
 Faker==40.36.0
+ibm_db==3.2.9          # required by db2.ipynb, which provides the %sql magic
 ibm_watsonx_ai==1.6.0
 ipykernel==7.3.0
 matplotlib==3.11.1

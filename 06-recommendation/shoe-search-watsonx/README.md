@@ -76,9 +76,14 @@ application join, and a second round trip.
 brands, models and inventory are invented, and no real product data or retailer imagery is
 included.
 
-- `shoes.csv` — the shoe catalogue with its store inventory
-- `shoes-vectors.csv` — one embedding per shoe, pre-computed
+- `shoes.csv` — the shoe catalogue with its store inventory (500 shoes)
+- `shoes-vectors.csv` — one 1024-dimension embedding per shoe, pre-computed
 - `utils.py` — helpers the search notebook imports
+
+> **Product photos are not included.** The notebook calls
+> `utils.display_sku_images(...)`, which looks for `images/<SKU>.jpeg`. Without that folder the
+> grid renders "Image not found" placeholders and everything else works normally. To see
+> pictures, drop your own `<SKU>.jpeg` files into `images/`.
 
 ---
 
