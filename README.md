@@ -27,7 +27,7 @@ Pick a module, pick a recipe inside it, follow the Quick start.
 
 | Module | What it covers | Needs | Recipes |
 |---|---|---|---|
-| [01-tabular-search](01-tabular-search/) | Similarity search over the rows of an ordinary table. Give each row a vector, and `VECTOR_DISTANCE` ranks rows by closeness — while a normal `WHERE` clause filters on ordinary columns in the same statement, which is the part a standalone vector store cannot do. The simplest module in the cookbook: pure SQL, no Python, and on Db2 12.1's `SAMPLE` database the demo table already exists, so it runs with zero setup. | SQL only | 1 |
+| [01-tabular-search](01-tabular-search/) | Similarity search over the rows of an ordinary table. Give each row a vector, and `VECTOR_DISTANCE` ranks rows by closeness — while a normal `WHERE` clause filters on ordinary columns in the same statement, which is the part a standalone vector store cannot do. The simplest module in the cookbook: pure SQL, no Python, and on Db2 12.1's `SAMPLE` database the demo table already exists, so it runs with zero setup. | SQL only, or Python + watsonx.ai | 2 |
 | [02-multimodal-embedding](02-multimodal-embedding/) | Turn images and text into vectors with three interchangeable embedding services — two self-hosted on CPU, one managed on AWS — and store the results in a Db2 `VECTOR` column for SQL similarity search. Both modalities land in the same vector space, so you can embed a text query and rank images against it. | Python + models (one uses AWS) | 3 |
 | [03-hybrid-search](03-hybrid-search/) | Find the right rows by combining keyword search and semantic search. Db2 Text Search gives the BM25 leg, native `VECTOR` columns with in-database `TO_EMBEDDING` give the semantic one, and a single SQL query fuses both rankings so each covers the other's blind spot. Ships a demo UI and a 118-query eval harness, so a change to the fusion is something you can measure. | Python + OpenSearch, Db2 12.1.5 | 1 |
 | [04-rag](04-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Chunk a source document, embed and store the chunks, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts alone. Three recipes solve this different ways — Haystack over a PDF, LangChain over a web article, and one with no framework at all that calls a hosted watsonx.ai model — so you can see which parts of a RAG pipeline are essential and which are framework flavour. | Python + local models | 3 |
@@ -49,8 +49,9 @@ Anything host-specific — OS package fixes, model downloads, build-from-source 
 
 ```
 db2-ai-cookbook/
-├── 01-tabular-search/            # similarity over table rows, in pure SQL
+├── 01-tabular-search/            # similarity over table rows
 │   ├── pure-sql/
+│   ├── python-watsonx/
 │   └── README.md
 ├── 02-multimodal-embedding/      # images + text → vectors → Db2 VECTOR
 │   ├── infinity-jina-clip-v2/
@@ -86,6 +87,7 @@ Don't repeat what the path already says. A module folder names the **capability*
 
 ```
 01-tabular-search/pure-sql                         approach (no framework at all)
+01-tabular-search/python-watsonx                   language + model hosting
 02-multimodal-embedding/infinity-jina-clip-v2      engine + model
 03-hybrid-search/sql-fusion-local-models           approach + model hosting
 04-rag/haystack-local-models                       framework + model hosting
