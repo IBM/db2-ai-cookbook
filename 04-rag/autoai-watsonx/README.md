@@ -121,6 +121,7 @@ through the `%sql` magic.
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
+| `ModelInference.txt` shrinks to ~75 bytes containing "Redirecting to v1.6.0/…" | The training corpus is scraped live from `ibm.github.io/watsonx-ai-python-sdk/fm_model_inference.html`, which now serves a **client-side redirect**. `WebBaseLoader` captures the redirect stub, not the documentation, and overwrites the file — so AutoAI would train on 75 bytes of nothing | Skip the scrape cell and keep the committed `ModelInference.txt`, or point the loader at the versioned URL it redirects to (`…/v1.6.0/fm_model_inference.html`) |
 | The AutoAI experiment reaches `failed` with `BXNIM0415E … Provided API key could…` | The **training job**, running server-side, cannot authenticate back to a service. Your key can be perfectly valid for SDK calls and still fail here | Check that the project has a **watsonx.ai Runtime instance associated** and that the API key carries the permissions the training job needs. Verified: SDK-level calls (`data_assets.list()`, `AutoAI.runs()`, embeddings, generation) all succeed while the job still fails |
 | `ModuleNotFoundError: tqdm` on the first import cell | `ibm_watsonx_ai.experiment` imports `tqdm` without declaring it | Already pinned in `requirements.txt` — do not remove it |
 | `ModuleNotFoundError: pysqlite3` | Loaded dynamically via `__import__('pysqlite3')`, so it is invisible to dependency scanners | `pysqlite3-binary` is pinned in `requirements.txt` |
