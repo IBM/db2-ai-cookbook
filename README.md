@@ -1,7 +1,5 @@
 ![Db2 AI Cookbook — recipes for building AI apps and agents](docs/images/cover.png)
 
-# Db2 AI Cookbook
-
 > Practical, runnable recipes for building AI features on IBM Db2 — embeddings, vector search, and the surrounding plumbing. Every recipe is minimal by design, so the moving parts stay visible.
 
 ![Db2](https://img.shields.io/badge/Db2-12.1%2B-054ada)
