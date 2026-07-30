@@ -1,5 +1,8 @@
 # Tabular similarity search with watsonx.ai embeddings
 
+> **Last checked 2026-07-29** — verified: watsonx embedded 20 rows at 1024-dim into a Db2 `VECTOR` column; `VECTOR_SERIALIZE`, `VECTOR_DIMENSION_COUNT`, `VECTOR_NORM` and `VECTOR_DISTANCE` all exercised.  
+> Checked on: Db2 12.1.5.0 · RHEL 10 · Python 3.12.
+
 [← Tabular search](../README.md) · [← Db2 AI Cookbook](../../README.md)
 
 > Turn each row of a table into a vector with the watsonx.ai embedding API, store it in a Db2

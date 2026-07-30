@@ -36,9 +36,9 @@ whether it actually got better.
 
 ## Recipes
 
-| Recipe | Lexical leg | Semantic leg | Fusion | Extras |
-|---|---|---|---|---|
-| [sql-fusion-local-models](sql-fusion-local-models/) | Db2 Text Search (BM25), OpenSearch-backed | native `VECTOR` + in-database `TO_EMBEDDING`, local `bge-small-en-v1.5` | gated, score-normalized weighted sum — one SQL query, **not** plain RRF | demo UI · eval harness · optional query-understanding gate and cross-encoder reranker |
+| Recipe | Lexical leg | Semantic leg | Fusion | Extras  | Last checked |
+|---|---|---|---|---|---|
+| [sql-fusion-local-models](sql-fusion-local-models/) | Db2 Text Search (BM25), OpenSearch-backed | native `VECTOR` + in-database `TO_EMBEDDING`, local `bge-small-en-v1.5` | gated, score-normalized weighted sum — one SQL query, **not** plain RRF | demo UI · eval harness · optional query-understanding gate and cross-encoder reranker  | ⚠️ 2026-07-29 partial |
 
 ## Prerequisites
 

@@ -1,5 +1,8 @@
 # RAG whose pattern was chosen by AutoAI
 
+> **Last checked 2026-07-29** — *partially* verified: runs as far as submitting the AutoAI experiment, which then fails server-side with `BXNIM0415E` (see [Troubleshooting](#troubleshooting)).  
+> Checked on: Db2 12.1.5.0 · RHEL 10 · Python 3.12.
+
 [← RAG](../README.md) · [← Db2 AI Cookbook](../../README.md)
 
 > Instead of picking the chunk size, the embedding model and the retrieval depth yourself, let

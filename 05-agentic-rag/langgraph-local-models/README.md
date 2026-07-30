@@ -1,5 +1,8 @@
 # 🔍 Agentic RAG with IBM Db2
 
+> **Last checked 2026-07-29** — verified: gateway healthy with both services, `/ingest` created 14 chunks, `/search` returned a grounded answer.  
+> Checked on: Db2 12.1.5.0 · RHEL 10 · Python 3.12.
+
 > **Local embeddings, hosted generation.** `granite-embedding-30m-english` runs locally via
 > `llama-cpp-python`; the language model is watsonx.ai, so this recipe needs `WATSONX_APIKEY`
 > and `WATSONX_PROJECT`.

@@ -26,9 +26,9 @@ flowchart LR
 
 ## Recipes
 
-| Recipe | Stack | What it shows |
-|---|---|---|
-| [shoe-search-watsonx](shoe-search-watsonx/) | Jupyter + watsonx.ai embeddings | Pick a men's size 12 running shoe in Ottawa, then find the closest match in the Toronto store's inventory — followed by a walkthrough of the vector column, the attribute-to-text step, and the `VECTOR_DISTANCE` query behind it |
+| Recipe | Stack | What it shows  | Last checked |
+|---|---|---|---|
+| [shoe-search-watsonx](shoe-search-watsonx/) | Jupyter + watsonx.ai embeddings | Pick a men's size 12 running shoe in Ottawa, then find the closest match in the Toronto store's inventory — followed by a walkthrough of the vector column, the attribute-to-text step, and the `VECTOR_DISTANCE` query behind it  | ⚠️ 2026-07-29 partial |
 
 ## Prerequisites
 

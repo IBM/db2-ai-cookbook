@@ -38,9 +38,9 @@ extra call or two, and buys a system that degrades honestly instead of hallucina
 
 ## Recipes
 
-| Recipe | Orchestration | Agent behaviour | Form |
-|---|---|---|---|
-| [langgraph-local-models](langgraph-local-models/) | [LangGraph](https://langchain-ai.github.io/langgraph/) over the `langchain-db2` connector | grade retrieved docs · rewrite the query · retry against an alternate source · fall back | a notebook prototype **and** the same pipeline split into three FastAPI services behind a gateway |
+| Recipe | Orchestration | Agent behaviour | Form  | Last checked |
+|---|---|---|---|---|
+| [langgraph-local-models](langgraph-local-models/) | [LangGraph](https://langchain-ai.github.io/langgraph/) over the `langchain-db2` connector | grade retrieved docs · rewrite the query · retry against an alternate source · fall back | a notebook prototype **and** the same pipeline split into three FastAPI services behind a gateway  | ✅ 2026-07-29 |
 
 Embeddings run locally on CPU — `granite-embedding-30m-english` through
 [llama.cpp](https://github.com/ggml-org/llama.cpp) — while the agent's reasoning and answers come

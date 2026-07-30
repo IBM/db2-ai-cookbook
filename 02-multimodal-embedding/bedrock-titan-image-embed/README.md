@@ -1,5 +1,8 @@
 # Bedrock Titan → Db2 vector store
 
+> **Last checked 2026-07-29** — verified: `embed_image.py` produced a 1024-dim Titan embedding and stored it in `SAMPLE.image_embeddings`. The output in Quick start below is the actual output.  
+> Checked on: Db2 12.1.5.0 · RHEL 10 · Python 3.12.
+
 > Embed an image with **Amazon Titan Multimodal G1** on AWS Bedrock, then store the image and its 1024-dim vector in a Db2 `VECTOR` column — ready for SQL similarity search. No GPU, no model download, no server.
 
 ![Engine](https://img.shields.io/badge/engine-AWS%20Bedrock-ff9900)

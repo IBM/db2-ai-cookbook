@@ -1,5 +1,8 @@
 # RAG on IBM Db2 12.1.2+ with Haystack, Docling, and local models
 
+> **Last checked 2026-07-29** — verified: 70 chunks ingested, a grounded answer with citations, and the grounding check still declines an unanswerable question.  
+> Checked on: Db2 12.1.5.0 · RHEL 10 · Python 3.12.
+
 [← Db2 AI Cookbook](../../README.md) · [← RAG module](../README.md)
 
 This tutorial builds **retrieval-augmented generation over your own PDF**, using IBM Db2 as the

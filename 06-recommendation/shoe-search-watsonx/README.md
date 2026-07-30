@@ -1,5 +1,8 @@
 # Finding a similar product in another store's inventory
 
+> **Last checked 2026-07-29** — *partially* verified: the 500-shoe catalogue, the 1024-dim pre-computed vectors and `utils.py` all load; the search notebook itself was not executed end to end.  
+> Checked on: Db2 12.1.5.0 · RHEL 10 · Python 3.12.
+
 [← Recommendation](../README.md) · [← Db2 AI Cookbook](../../README.md)
 
 > You found the running shoe you want at the Ottawa store. Is there anything close to it in

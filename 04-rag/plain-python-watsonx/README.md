@@ -1,5 +1,8 @@
 # Build a RAG Pipeline with Db2, llama.cpp, and Watsonx.ai
 
+> **Last checked 2026-07-29** — verified: notebook executed end to end, 25/25 cells, grounded answer quoting the source article's SQL.  
+> Checked on: Db2 12.1.5.0 · RHEL 10 · Python 3.12.
+
 [← Db2 AI Cookbook](../../README.md) · [← RAG module](../README.md)
 
 This recipe walks through a full Retrieval-Augmented Generation (RAG) pipeline using open components for local embedding generation and a production-grade database, IBM Db2, for vector storage and retrieval.

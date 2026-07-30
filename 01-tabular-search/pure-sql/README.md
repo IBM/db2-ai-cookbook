@@ -1,5 +1,8 @@
 # Tabular similarity search in pure SQL
 
+> **Last checked 2026-07-29** — verified: all seven queries against Db2 12.1.5, 20 rows with 20 embeddings.  
+> Checked on: Db2 12.1.5.0 · RHEL 10 · Python 3.12.
+
 [← Tabular search](../README.md) · [← Db2 AI Cookbook](../../README.md)
 
 > Find the rows most similar to a given row, using a native Db2 `VECTOR` column and a `WHERE`

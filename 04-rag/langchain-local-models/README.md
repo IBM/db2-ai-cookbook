@@ -1,5 +1,8 @@
 # RAG with IBM Db2 & Local LLMs in Red Hat Linux
 
+> **Last checked 2026-07-29** — verified: notebook executed end to end, 20/20 cells, 15 chunks, answers citing SQL from the source article.  
+> Checked on: Db2 12.1.5.0 · RHEL 10 · Python 3.12.
+
 [← Db2 AI Cookbook](../../README.md) · [← RAG module](../README.md)
 
 A Retrieval-Augmented Generation (RAG) pipeline that answers questions by grounding responses in web content stored in **IBM Db2's vector database**. This project leverages **Db2's native vector search capabilities** and the **official LangChain-Db2 connector** for seamless integration with local LLM models.

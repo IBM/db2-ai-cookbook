@@ -28,10 +28,10 @@ system and glue code. Keeping the vector in the row makes it one query.
 
 ## Recipes
 
-| Recipe | Stack | What it shows |
-|---|---|---|
-| [pure-sql](pure-sql/) | `db2` CLP only — no Python, no framework | `VECTOR`, `VECTOR_DISTANCE`, `VECTOR_SERIALIZE`, `VECTOR_DIMENSION_COUNT` across seven `.sql` files, over a 20-row patient table. Vectors are pre-computed |
-| [python-watsonx](python-watsonx/) | Jupyter + watsonx.ai embedding API | Where the vectors come from: turn each row into a sentence, embed it with `multilingual-e5-large` (1024-dim), store it in Db2, then add `VECTOR_NORM` to the toolkit |
+| Recipe | Stack | What it shows  | Last checked |
+|---|---|---|---|
+| [pure-sql](pure-sql/) | `db2` CLP only — no Python, no framework | `VECTOR`, `VECTOR_DISTANCE`, `VECTOR_SERIALIZE`, `VECTOR_DIMENSION_COUNT` across seven `.sql` files, over a 20-row patient table. Vectors are pre-computed  | ✅ 2026-07-29 |
+| [python-watsonx](python-watsonx/) | Jupyter + watsonx.ai embedding API | Where the vectors come from: turn each row into a sentence, embed it with `multilingual-e5-large` (1024-dim), store it in Db2, then add `VECTOR_NORM` to the toolkit  | ✅ 2026-07-29 |
 
 The two are halves of one story — the first queries vectors, the second produces them. They build
 the same `PATIENTS` table at **different dimensions** (768 vs 1024), so they cannot share it; run

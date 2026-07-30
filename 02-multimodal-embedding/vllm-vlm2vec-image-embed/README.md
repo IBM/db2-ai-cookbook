@@ -1,5 +1,8 @@
 # vLLM VLM2Vec → Db2 vector store
 
+> **Not checked** — vLLM needs a GPU; not exercised in the last QA pass.  
+> Checked on: Db2 12.1.5.0 · RHEL 10 · Python 3.12.
+
 > Embed an image with **VLM2Vec-Full** on a local, CPU-only [vLLM](https://docs.vllm.ai) server, then store the image and its 3072-dim vector in a Db2 `VECTOR` column — ready for SQL similarity search.
 
 ![Engine](https://img.shields.io/badge/engine-vLLM%200.22%20(CPU)-76b900)

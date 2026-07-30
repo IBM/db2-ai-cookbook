@@ -36,6 +36,21 @@ Pick a module, pick a recipe inside it, follow the Quick start.
 
 More modules are on the way. See [Adding a module](#adding-a-module) below.
 
+## Verification status
+
+Each module's recipe table carries a **Last checked** date, and every recipe README opens with what
+was verified and against which environment. The marks mean:
+
+| Mark | Meaning |
+|---|---|
+| ✅ | Run end to end on the date shown, against a real Db2 and real services |
+| ⚠️ | Partially verified — the recipe README says exactly how far it got and why it stopped |
+| — | Not exercised in the last pass (usually a missing GPU or a large model download) |
+
+A date is a claim about that day and that environment, not a guarantee. These stacks move: watsonx
+retires model IDs, PyPI releases break APIs. If a recipe fails, check its Troubleshooting section
+first — several document exactly this class of decay.
+
 ## Prerequisites
 
 Most recipes that persist vectors need **Db2 ≥ 12.1.2** (where the `VECTOR` type lands) with the `SAMPLE` database, reachable either locally (run as the instance owner) or over TCP/IP (`DB2COMM=TCPIP`, default port `50000`). Recipes that only compute embeddings and hand them back need no Db2 at all.

@@ -1,5 +1,8 @@
 # Infinity + jina-clip-v2 (CPU)
 
+> **Not checked** — needs the `jina-clip-v2` model download; not exercised in the last QA pass.  
+> Checked on: Db2 12.1.5.0 · RHEL 10 · Python 3.12.
+
 > Send an image **URL** (or text) to a local [Infinity](https://github.com/michaelfeil/infinity) server and get back a 1024-dim vector — the lightest, fastest local path in this repo. Containerless, CPU-only, `curl` is the only client.
 
 ![Engine](https://img.shields.io/badge/engine-Infinity%20(torch%2C%20CPU)-purple)

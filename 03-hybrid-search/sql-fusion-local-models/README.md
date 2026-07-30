@@ -1,5 +1,8 @@
 # Hybrid Search on IBM Db2 12.1.5
 
+> **Last checked 2026-07-29** — *partially* verified: preflight passes and `1_ingest.sql` imports 92 rows, but search fails because the Db2 instance was not configured for Text Search (see [Troubleshooting](#troubleshooting)).  
+> Checked on: Db2 12.1.5.0 · RHEL 10 · Python 3.12.
+
 [← Db2 AI Cookbook](../../README.md) · [← Hybrid search module](../README.md)
 
 This tutorial implements **hybrid search** on **IBM Db2 12.1.5**, using the AI stack

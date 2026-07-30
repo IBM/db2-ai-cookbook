@@ -28,11 +28,11 @@ flowchart LR
 
 ## Recipes
 
-| Recipe | Engine | Model | Dim | Image input | Db2 storage | Install |
-|---|---|---|---|---|---|---|
-| [infinity-jina-clip-v2](infinity-jina-clip-v2/) | Infinity (torch, CPU) | `jinaai/jina-clip-v2` | 1024 | image **URL** | — | `pip install` (pinned) |
-| [vllm-vlm2vec-image-embed](vllm-vlm2vec-image-embed/) | vLLM (CPU) | `TIGER-Lab/VLM2Vec-Full` | 3072 | base64 data URL | `image_embeddings_vlm2vec` | source build¹ |
-| [bedrock-titan-image-embed](bedrock-titan-image-embed/) | AWS Bedrock (managed) | `amazon.titan-embed-image-v1` | 1024 | raw base64 | `image_embeddings` | `pip install boto3` |
+| Recipe | Engine | Model | Dim | Image input | Db2 storage | Install  | Last checked |
+|---|---|---|---|---|---|---|---|
+| [infinity-jina-clip-v2](infinity-jina-clip-v2/) | Infinity (torch, CPU) | `jinaai/jina-clip-v2` | 1024 | image **URL** | — | `pip install` (pinned)  | — not checked |
+| [vllm-vlm2vec-image-embed](vllm-vlm2vec-image-embed/) | vLLM (CPU) | `TIGER-Lab/VLM2Vec-Full` | 3072 | base64 data URL | `image_embeddings_vlm2vec` | source build¹  | — not checked |
+| [bedrock-titan-image-embed](bedrock-titan-image-embed/) | AWS Bedrock (managed) | `amazon.titan-embed-image-v1` | 1024 | raw base64 | `image_embeddings` | `pip install boto3`  | ✅ 2026-07-29 |
 
 ¹ This host is AVX2-only with glibc 2.34, so vLLM had no installable CPU wheel and was built from source. On an AVX-512 host with glibc ≥ 2.35, a plain `pip install` works — see that recipe's appendix.
 
