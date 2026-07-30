@@ -44,7 +44,7 @@ extra call or two, and buys a system that degrades honestly instead of hallucina
 
 Embeddings run locally on CPU — `granite-embedding-30m-english` through
 [llama.cpp](https://github.com/ggml-org/llama.cpp) — while the agent's reasoning and answers come
-from **hosted watsonx.ai** (`mistralai/mistral-large`). You need a `WATSONX_APIKEY`; the
+from **hosted watsonx.ai** (`ibm/granite-4-h-small`). You need a `WATSONX_APIKEY`; the
 embedding half costs nothing.
 
 ## Two lessons in one recipe

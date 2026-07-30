@@ -155,7 +155,7 @@ def initialize_components():
         llm = ChatWatsonx(
             url="https://us-south.ml.cloud.ibm.com",
             apikey=os.getenv("WATSONX_APIKEY"),
-            model_id="mistralai/mistral-large",
+            model_id="ibm/granite-4-h-small",
             project_id=os.getenv("WATSONX_PROJECT"),
             params={"temperature": 0}
         )

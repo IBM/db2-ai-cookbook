@@ -101,6 +101,29 @@ You’ll go through:
 
 ---
 
+## Expected Output
+
+The notebook ends with a grounded answer built from the chunks retrieved out of Db2. Running it
+against the shipped article produces something like this:
+
+> **Q:** How to build a linear regression model using IDAX?
+>
+> **A:** You can build a linear regression model using IDAX by calling the `LINEAR_REGRESSION`
+> stored procedure. The procedure uses training examples from a specified table, and learns the
+> values of the intercept and coefficients based on the input features and output column.
+>
+> ```sql
+> CALL IDAX.LINEAR_REGRESSION('model=GOSALES.GOSALES_LINREG,
+>   intable=GOSALES.GOSALES_TRAIN, id=ID, target=PURCHASE_AMOUNT,
+>   incolumn=AGE;GENDER;MARITAL_STATUS;PROFESSION, intercept=true');
+> ```
+
+The wording will vary — generation is sampled at `temperature 0.6` — but the answer should cite
+the SQL from the source article rather than inventing an API. **An empty answer is the failure to
+watch for**: it means the model returned nothing, which raises no error. See
+[Notes](#notes) if that happens.
+
+
 ## Environment Configuration
 
 Copy the template and fill it in — the notebook reads `.env` from this recipe's folder:
@@ -143,6 +166,18 @@ exactly which parts a framework is handling for you.
 ---
 
 ## Notes
+
+**watsonx model IDs expire.** This recipe calls `meta-llama/llama-3-3-70b-instruct`. IBM retires
+and versions model IDs on a published lifecycle, so a recipe that worked last quarter can fail
+with `Model '<id>' is not supported for this environment` or
+`model_no_support_for_function`. Neither message says the model was withdrawn. List what your
+project can actually use with `APIClient.foundation_models.get_model_specs()`, and prefer a model
+whose lifecycle is *current* and which supports `text_generation`.
+
+If the answer comes back **empty** with no error, the model accepted the prompt and returned
+nothing — usually a chat-tuned model given a bare `Answer:` completion prompt. Switch models or
+reshape the prompt into chat turns.
+
 
 * The **embedding model** runs locally via `llama.cpp` with no GPU required
 * The **vector store and search** are handled inside IBM Db2 using `VECTOR` type and distance functions
