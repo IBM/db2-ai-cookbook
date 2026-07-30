@@ -67,3 +67,7 @@ Thumbs.db
 
 # scratch file written by loadvectors.sh
 temp.sql
+
+# Db2 Jupyter magic — every notebook that needs it downloads it from
+# github.com/IBM/db2-jupyter at runtime. Never vendor it.
+db2.ipynb
