@@ -164,6 +164,14 @@ cd /opt/ibm/db2/V12.1/instance
 ./db2icrt -u db2inst1 -nosharedgroup db2inst1
 ```
 
+> ⚠️ **The instance must also be configured for Db2 Text Search**, which `db2icrt` above does not
+> do. Without it, Step 3's `SYSTS_*` procedures exist but cannot load their library, so
+> `1_ingest.sql` fails with `SQL0444N` on `SYSTS_CREATE`/`SYSTS_UPDATE` — and the symptom you
+> actually notice is a *search* error much later: `SQL20425N … an active text search index does not
+> exist`. Verify with `db2ts "START FOR TEXT"`; if it answers
+> `CIE0774E The DB2 Text Search configuration could not be found`, the instance needs updating
+> (`db2iupdt -j "TEXT_SEARCH"` as root, with the instance stopped) before Step 3 will work.
+
 The Db2 software is installed and the `db2inst1` instance exists. You configure and
 start it in Step 3 (after OpenSearch is in place).
 
@@ -193,6 +201,13 @@ sudo mv opensearch-3.7.0 opensearch
 sudo rm opensearch-3.7.0-linux-x64.tar.gz
 sudo chown -R db2inst1:db2inst1 /opt/opensearch
 ```
+
+> If OpenSearch is **already installed** on the box — from an RPM or an earlier tarball — it is
+> probably owned by a dedicated `opensearch` user, and these `sudo -u db2inst1` commands then fail
+> with `AccessDeniedException` on `config/opensearch.yml`. Either start it as its owning user
+> (`sudo -u opensearch /opt/opensearch/bin/opensearch -d`) or re-chown the whole directory to
+> `db2inst1`. Also check `network.host` in that config: an existing install may bind `0.0.0.0`,
+> whereas this recipe expects `127.0.0.1` with security disabled.
 
 **2.3 — Write the config** (single-node, security off). This one block writes the
 whole file as db2inst1:
@@ -575,6 +590,8 @@ and `smoke-test.sh` catch that. Symptom → cause → fix:
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| Ingest logs `SQL0444N` on `SYSTS_CREATE`/`SYSTS_UPDATE`, then search fails with `SQL20425N … active text search index does not exist` | The instance was never configured for Db2 Text Search, so the routines cannot load their library. The ingest *appears* to succeed — the rows import fine | `db2ts "START FOR TEXT"`; if it returns `CIE0774E`, run `db2iupdt -j "TEXT_SEARCH"` as root with Db2 stopped, then re-run Step 3 and the ingest |
+| `AccessDeniedException: /opt/opensearch/config/opensearch.yml` when starting OpenSearch | A pre-existing install is owned by an `opensearch` user, not `db2inst1` | Start it as the owning user, or `chown -R db2inst1:db2inst1 /opt/opensearch` |
 | Ingest rejects **every** row: `SQL0803N` duplicate key (preceded by `SQL0601N`, `SQL20536N`) | **OpenSearch is down.** `SYSTS_DROP` fails → the text index survives → it blocks `DROP TABLE` → `CREATE TABLE` fails → `IMPORT` runs against the *old* table, so every row collides. The errors never mention the stopped service. | `./scripts/preflight.sh` before ingesting — it waits for OpenSearch/embeddings and says so plainly |
 | Ingest: `CIE00323 … database not enabled for text` | Text Search was never enabled on the database | Run Step 3.3 (`SYSTS_ENABLE` + `SYSTS_CREATE_SERVER`), then re-ingest |
 | Search: `CIE00701 Internal error` / `SQL20423N` on the text index | OpenSearch was reinstalled/wiped **after** the text index was built, orphaning it | Rebuild it: re-run `db2 -tvf scripts/1_ingest.sql` (drops + recreates the index on the current OpenSearch) |
