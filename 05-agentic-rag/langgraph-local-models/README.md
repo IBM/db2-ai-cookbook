@@ -169,6 +169,47 @@ curl -X POST "http://localhost:8000/search" \
   -d '{"query": "What is the main topic?", "table_name": "AI_KNOWLEDGE"}'
 ```
 
+### Expected output
+
+Verified end to end against Db2 12.1.5 and watsonx.ai.
+
+**Health** — the gateway runs both services in one process:
+
+```json
+{"status":"healthy","services":{"ingestion":"healthy","search":"healthy"},"mode":"all-in-one"}
+```
+
+**Ingest:**
+
+```json
+{"success":true,"message":"Created table 'AI_KNOWLEDGE' with 14 chunks","chunks_created":14}
+```
+
+**Search** — a grounded answer assembled from the retrieved chunks:
+
+```json
+{"success":true,"answer":"Stratified sampling in Db2 refers to a method of sampling data where
+the population is divided into distinct subgroups or \"strata\", and samples are taken from each
+stratum..."}
+```
+
+**A question the document cannot answer** returns an error rather than an answer:
+
+```json
+{"detail":"No answer generated"}
+```
+
+That is the agent grading its own retrieval and declining — the behaviour this recipe exists to
+show — but note it surfaces as an HTTP error, not a structured "not covered" response. Handle it
+as a normal outcome in any client you build on top.
+
+> ⚠️ **Check the chunk count.** `chunks_created: 1` means text extraction failed, not that your
+> document is short. `trafilatura` returns almost nothing for JavaScript-rendered pages — an IBM
+> Community blog post yielded **562 characters and 1 chunk**, while a Wikipedia article of similar
+> length gave **12,895 characters and 14 chunks**. Ingest still reports `success: true`, so the
+> only signal is the count. With one thin chunk the answers come mostly from the model's own
+> knowledge, which is exactly what this recipe is built to avoid.
+
 ## Development Approaches
 
 ### Option 1: Modular Development
