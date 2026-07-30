@@ -125,9 +125,9 @@ uv run python -m spacy download en_core_web_sm
 
 ### 5. Configure Environment
 
-Create `.env` file in this recipe's folder:
+Copy the template and fill in your values:
 ```bash
-touch .env
+cp .env.example .env
 ```
 
 If using VS Code, open this recipe's folder using VS Code.
@@ -189,6 +189,32 @@ display(Markdown(markdown_output))
 3. Chunks are injected into prompt as context
 4. Local LLM generates answer grounded in context
 5. Returns both answer and source documents
+
+### Expected output
+
+Running the notebook against the shipped article produces **15 chunks** and answers grounded in
+them. Asking *"How to build a linear regression model in Db2?"*:
+
+> ## 💡 Answer
+>
+> To build a linear regression model in Db2, follow these steps:
+>
+> 1. **Create the Db2 table**: First, you need to create a Db2 table named `GOSALES_FULL` under
+>    the schema `GOSALES`…
+>
+> ```sql
+> CREATE TABLE GOSALES.GOSALES_FULL (
+>   ID INT, AGE INT, MARITAL_STATUS VARCHAR(50),
+>   PROFESSION VARCHAR(50), PURCHASE_AMOUNT DECIMAL(18,2) );
+> ```
+
+followed by the three retrieved chunks under **📚 Retrieved Context**. The wording varies between
+runs — the local model samples — but the SQL should come from the source article rather than being
+invented.
+
+You will also see `init: embeddings required but some input tokens were not marked as outputs ->
+overriding` repeated on stderr. That is `llama.cpp` chatter while embedding each chunk, not an
+error.
 
 ---
 
