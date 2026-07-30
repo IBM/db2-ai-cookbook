@@ -19,8 +19,8 @@ record. The question is *"who is most like patient 2, among people aged 35–40?
 
 ## Quick start
 
-Db2 12.1's `SAMPLE` database already ships `PATIENTS` **with its embeddings**, so there is usually
-nothing to set up. Confirm, then run the payoff query:
+Db2's `SAMPLE` database already ships `PATIENTS` **with its embeddings** — verified on 12.1.5 —
+so there is usually nothing to set up. On an earlier 12.1.x, run the check below first. Confirm, then run the payoff query:
 
 ```bash
 db2 connect to SAMPLE

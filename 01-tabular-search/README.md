@@ -40,8 +40,8 @@ the second against its own database if you want to keep the first working.
 ## Prerequisites
 
 Db2 **12.1.2 or later** — that is where the `VECTOR` type lands — and a database to run against.
-[pure-sql](pure-sql/) needs nothing else: no Python, no virtualenv, no models, and on Db2 12.1's
-`SAMPLE` database the demo table already exists with its embeddings, so it runs with zero setup.
+[pure-sql](pure-sql/) needs nothing else: no Python, no virtualenv, no models, and the `SAMPLE` database already contains the demo table with its embeddings — verified on 12.1.5 —
+so it runs with zero setup.
 [python-watsonx](python-watsonx/) additionally needs Python 3.12 and a watsonx.ai API key, since
 it calls the hosted embedding API.
 

@@ -2,9 +2,14 @@
 
 > Practical, runnable recipes for building AI features on IBM Db2 — embeddings, vector search, and the surrounding plumbing. Every recipe is minimal by design, so the moving parts stay visible.
 
-![Db2](https://img.shields.io/badge/Db2-12.1%2B-054ada)
+![Db2](https://img.shields.io/badge/Db2-12.1.2%2B-054ada)
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Status](https://img.shields.io/badge/purpose-learning%20%2F%20reference-success)
+
+> **Db2 12.1.2 or later is required across the cookbook.** That release introduced the native
+> `VECTOR` type and `VECTOR_DISTANCE`, which nearly every recipe depends on. A few recipes need a
+> later level — [03-hybrid-search](03-hybrid-search/) wants **12.1.5** for Db2 Text Search and
+> in-database `TO_EMBEDDING` — and each recipe states its own floor. Check yours with `db2level`.
 
 The cookbook is organised in two levels:
 
@@ -27,7 +32,7 @@ Pick a module, pick a recipe inside it, follow the Quick start.
 
 | Module | What it covers | Needs | Recipes |
 |---|---|---|---|
-| [01-tabular-search](01-tabular-search/) | Similarity search over the rows of an ordinary table. Give each row a vector, and `VECTOR_DISTANCE` ranks rows by closeness — while a normal `WHERE` clause filters on ordinary columns in the same statement, which is the part a standalone vector store cannot do. The simplest module in the cookbook: pure SQL, no Python, and on Db2 12.1's `SAMPLE` database the demo table already exists, so it runs with zero setup. | SQL only, or Python + watsonx.ai | 2 |
+| [01-tabular-search](01-tabular-search/) | Similarity search over the rows of an ordinary table. Give each row a vector, and `VECTOR_DISTANCE` ranks rows by closeness — while a normal `WHERE` clause filters on ordinary columns in the same statement, which is the part a standalone vector store cannot do. The simplest module in the cookbook: pure SQL, no Python, and on Db2 12.1.2+ the `SAMPLE` database already contains the demo table, so it runs with zero setup. | SQL only, or Python + watsonx.ai | 2 |
 | [02-multimodal-embedding](02-multimodal-embedding/) | Turn images and text into vectors with three interchangeable embedding services — two self-hosted on CPU, one managed on AWS — and store the results in a Db2 `VECTOR` column for SQL similarity search. Both modalities land in the same vector space, so you can embed a text query and rank images against it. | Python + models (one uses AWS) | 3 |
 | [03-hybrid-search](03-hybrid-search/) | Find the right rows by combining keyword search and semantic search. Db2 Text Search gives the BM25 leg, native `VECTOR` columns with in-database `TO_EMBEDDING` give the semantic one, and a single SQL query fuses both rankings so each covers the other's blind spot. Ships a demo UI and a 118-query eval harness, so a change to the fusion is something you can measure. | Python + OpenSearch, Db2 12.1.5 | 1 |
 | [04-rag](04-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Chunk a source document, embed and store the chunks, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts alone. Three recipes solve this different ways — Haystack over a PDF, LangChain over a web article, and one with no framework at all that calls a hosted watsonx.ai model — so you can see which parts of a RAG pipeline are essential and which are framework flavour. | Python + local models, or watsonx.ai | 4 |
@@ -53,9 +58,9 @@ first — several document exactly this class of decay.
 
 ## Prerequisites
 
-Most recipes that persist vectors need **Db2 ≥ 12.1.2** (where the `VECTOR` type lands) with the `SAMPLE` database, reachable either locally (run as the instance owner) or over TCP/IP (`DB2COMM=TCPIP`, default port `50000`). Recipes that only compute embeddings and hand them back need no Db2 at all.
+**Minimum: Db2 12.1.2.** Recipes that persist vectors need it (that is where the `VECTOR` type lands) with the `SAMPLE` database, reachable either locally (run as the instance owner) or over TCP/IP (`DB2COMM=TCPIP`, default port `50000`). Recipes that only compute embeddings and hand them back need no Db2 at all.
 
-One module asks for less: [01-tabular-search](01-tabular-search/) is SQL only — no Python, no virtualenv, no models — and its table ships with the `SAMPLE` database on Db2 12.1, so it needs no setup at all.
+One module asks for less: [01-tabular-search](01-tabular-search/) is SQL only — no Python, no virtualenv, no models — and its table ships with the `SAMPLE` database on Db2 12.1.2+, so it needs no setup at all.
 
 One module asks for more: [03-hybrid-search](03-hybrid-search/) needs **Db2 12.1.5** plus OpenSearch, because it uses Db2 Text Search and in-database `TO_EMBEDDING` rather than just the `VECTOR` type.
 

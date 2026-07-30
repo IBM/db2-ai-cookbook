@@ -150,7 +150,7 @@ A few non-obvious choices behind the minimal code:
 - **Region is read explicitly** — `region_name=os.environ["AWS_REGION"]`. botocore auto-discovers `AWS_DEFAULT_REGION` from the environment but **not** `AWS_REGION`; reading it ourselves keeps the `.env` name standard and fails fast with a clear `KeyError` if it's missing.
 - **The BLOB is bound as `SQL_BLOB`.** A JPEG contains null bytes; binding it as a plain string would truncate it. Stored length matches the file byte-for-byte.
 - **Db2 connection is `.env`-driven** — one code path, local-trusted or remote-TCP, chosen at runtime by the presence of `DB2_HOSTNAME`.
-- **`CREATE TABLE IF NOT EXISTS`** keeps the script idempotent on schema (Db2 ≥ 12.1); rows still accumulate per run.
+- **`CREATE TABLE IF NOT EXISTS`** keeps the script idempotent on schema (Db2 ≥ 12.1.2); rows still accumulate per run.
 
 ## What's not here
 

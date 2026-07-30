@@ -31,9 +31,9 @@ jupyter lab similar-patients-search.ipynb    # or open it in VS Code
 The notebook downloads [`db2.ipynb`](https://github.com/IBM/db2-jupyter) on first run — that is
 what provides the `%sql` magic it uses to talk to Db2.
 
-> ⚠️ **This recipe rebuilds the `PATIENTS` table** with a `VECTOR(1024)` column. On Db2 12.1's
-> `SAMPLE` database that **replaces the shipped `PATIENTS` table**, whose vectors are 768
-> dimensions — which is what [pure-sql](../pure-sql/) reads. Run this recipe against its own
+> ⚠️ **This recipe rebuilds the `PATIENTS` table** with a `VECTOR(1024)` column. Where `SAMPLE`
+> ships its own `PATIENTS` — verified on Db2 12.1.5 — this **replaces that table**, whose vectors
+> are 768 dimensions — which is what [pure-sql](../pure-sql/) reads. Run this recipe against its own
 > database, or expect to rebuild the sample table afterwards.
 
 ## Expected output
