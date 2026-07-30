@@ -34,11 +34,18 @@ flowchart LR
 | [langchain-local-models](langchain-local-models/) | [LangChain](https://python.langchain.com/) + the `langchain-db2` connector | a **web article**, extracted by [trafilatura](https://trafilatura.readthedocs.io/) | spaCy sentences, 200 words / 50 overlap | Granite 30M + Qwen2.5 3B via `LlamaCpp` · 384-d | Jupyter notebook  | ✅ 2026-07-29 |
 | [plain-python-watsonx](plain-python-watsonx/) | **none** — plain Python over raw SQL | a **blog post**, extracted by [trafilatura](https://trafilatura.readthedocs.io/) | spaCy, sentence-aware with overlap | Granite 30M local; answers from **hosted watsonx.ai** | Jupyter notebook  | ✅ 2026-07-29 |
 | [autoai-watsonx](autoai-watsonx/) | **watsonx.ai AutoAI RAG** chooses the pattern | **Db2 ML articles**, loaded from COS | whatever AutoAI selects — that is the point | selected by AutoAI, hosted on watsonx.ai · 1024-d | Jupyter notebook  | ⚠️ 2026-07-29 partial |
+| [second-brain-app](second-brain-app/) | **none** — FastAPI + [Docling](https://github.com/docling-project/docling) | **any web page or PDF** you paste into a browser form | none yet — the full article is stored as a `CLOB` | none yet — this recipe captures, it does not answer | FastAPI app  | ✅ 2026-07-30 |
 
 The first two run entirely on your own machine — no API keys, no cloud, no per-call cost. The
 third keeps embeddings local but calls a hosted model to write the answer. The fourth is fully
 hosted and additionally needs an IBM Cloud Object Storage bucket, but it is the only one that
 **measures** its retrieval quality rather than assuming it.
+
+The fifth is a different shape entirely. Where the others run once and stop, **second-brain-app**
+is an application you leave running and keep feeding — but it currently covers only the capture
+half of RAG, storing article text in Db2 without embedding or retrieving it yet. Read it for how a
+corpus gets built and maintained; read the others for the retrieval and answering it has still to
+grow.
 
 ### Which one should I use?
 

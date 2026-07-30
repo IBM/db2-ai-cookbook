@@ -1,0 +1,6 @@
+# Versions verified working together on 2026-07-30
+docling==2.117.0
+fastapi==0.141.1
+uvicorn==0.52.0
+ibm_db==3.2.9     # official IBM Db2 driver
+marko==2.2.3      # renders the stored markdown back to HTML

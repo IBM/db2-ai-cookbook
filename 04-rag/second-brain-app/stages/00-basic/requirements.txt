@@ -1,0 +1,4 @@
+# Versions verified working together on 2026-07-30
+docling==2.117.0
+fastapi==0.141.1
+uvicorn==0.52.0
