@@ -1,8 +1,11 @@
 # Pinned: these versions resolve and import together (checked 2026-07-29).
 ibm_db==3.2.9          # required by db2.ipynb, which provides the %sql magic
 ibm_watsonx_ai==1.6.0
+tqdm==4.70.0          # ibm_watsonx_ai.experiment imports tqdm but does not declare it
 ipykernel==7.3.0
 langchain-ibm==1.1.0
 langchain-community==0.4.2
 pandas==2.3.3
 python-dotenv==1.2.2
+matplotlib==3.11.1              # pandas .plot() imports matplotlib lazily at call time
+pysqlite3-binary==0.5.4.post2   # loaded via __import__('pysqlite3') to replace stdlib sqlite3

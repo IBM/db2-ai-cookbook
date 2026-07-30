@@ -19,6 +19,12 @@ than assumed.
 The corpus is a set of published Db2 machine-learning articles, and the questions are about their
 content.
 
+> **Verification status.** Everything up to and including experiment *submission* is verified on
+> Db2 12.1.5 with watsonx.ai: credentials, data-asset upload, the optimizer run being created and
+> polled. The experiment itself then failed server-side with `BXNIM0415E` (see
+> [Troubleshooting](#troubleshooting)) — an environment/permissions matter, not a code defect. The
+> Db2 half of the recipe has therefore not been executed end to end.
+
 ## Quick start
 
 ```bash
@@ -112,6 +118,11 @@ through the `%sql` magic.
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
+| The AutoAI experiment reaches `failed` with `BXNIM0415E … Provided API key could…` | The **training job**, running server-side, cannot authenticate back to a service. Your key can be perfectly valid for SDK calls and still fail here | Check that the project has a **watsonx.ai Runtime instance associated** and that the API key carries the permissions the training job needs. Verified: SDK-level calls (`data_assets.list()`, `AutoAI.runs()`, embeddings, generation) all succeed while the job still fails |
+| `ModuleNotFoundError: tqdm` on the first import cell | `ibm_watsonx_ai.experiment` imports `tqdm` without declaring it | Already pinned in `requirements.txt` — do not remove it |
+| `ModuleNotFoundError: pysqlite3` | Loaded dynamically via `__import__('pysqlite3')`, so it is invisible to dependency scanners | `pysqlite3-binary` is pinned in `requirements.txt` |
+| `ModuleNotFoundError: matplotlib` midway through | pandas imports matplotlib lazily when `.plot()` is called | `matplotlib` is pinned in `requirements.txt` |
+| `Model '<id>' is not supported for this environment` | watsonx retires and versions model IDs on a published lifecycle | List what your project can actually use with `client.foundation_models.get_model_specs()`; this recipe targets `meta-llama/llama-3-3-70b-instruct` and `ibm/granite-embedding-278m-multilingual` |
 | The AutoAI experiment fails to start | No COS connection asset in the watsonx.ai project | Create the connection, then put its ID in `.env` |
 | `%sql` is not defined | `db2.ipynb` did not download | Fetch it from [IBM/db2-jupyter](https://github.com/IBM/db2-jupyter) into this folder |
 | Answers look like quiz questions, or ignore the corpus | Retrieval returned irrelevant chunks — check the `ORDER BY` is `ASC` | Distances sort ascending; closest first |
