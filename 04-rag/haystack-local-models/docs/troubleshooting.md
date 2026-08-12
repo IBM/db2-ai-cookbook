@@ -22,4 +22,5 @@ Symptom → cause → fix. Every row here is a failure hit while building this.
 | `ModuleNotFoundError: No module named 'haystack_db2_rag'` | The package lives in `src/` | `export PYTHONPATH=src` |
 | `Connection refused` on `:8081` or `:8080` | A llama.cpp server isn't running | `scripts/llama-servers.sh start`, then `status` |
 | transformers warns `Token indices sequence length is longer … (519 > 512)` | A chunk exceeds the embedding window and is being silently truncated | Lower `EMBED_MAX_TOKENS` in `settings.py` (448 works for this PDF) |
+| `ingest` dies in thousands of lines of `torch._inductor` traceback, ending in `fatal error: Python.h: No such file or directory` | docling 2.119+ runs its layout model through `torch.compile`, which generates C++ and compiles it — that needs the CPython headers, absent from RHEL by default | Keep the `docling==2.115.0` pin in `requirements.txt`. On a newer docling: `sudo dnf install -y python3-devel`, or run with `TORCHDYNAMO_DISABLE=1` if you have no root |
 | First `ingest` run seems to hang | It's downloading Docling's ~500 MB layout models | Wait it out; subsequent runs are offline and fast |

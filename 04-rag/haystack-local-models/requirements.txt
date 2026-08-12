@@ -3,4 +3,10 @@ haystack-ai==3.0.0
 ibm-db-haystack==0.2.0
 docling-haystack==1.3.0
 python-dotenv==1.2.2
-# docling-haystack pulls in docling 2.115.0, torch and transformers (~several GB)
+
+# docling is pinned deliberately: docling-haystack does not pin it, so without this line pip
+# installs whatever is newest. From 2.119.0 the layout model runs under torch.compile, which
+# generates C++ and fails with `fatal error: Python.h` unless python3-devel is installed.
+# Bump it as its own change, and re-verify the README's chunk counts when you do.
+docling==2.115.0
+# docling pulls in torch and transformers (~several GB)
