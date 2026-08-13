@@ -49,8 +49,11 @@ start() {
   if curl -sf -o /dev/null "http://127.0.0.1:$CHAT_PORT/health"; then
     echo "  chat already running on :$CHAT_PORT"
   else
+    # 8192, not 2048: the prompt holds top_k chunks of up to 448 tokens each, so --top-k 10
+    # needs ~3.2k and llama.cpp rejects the whole request rather than truncating
+    # ("request (N tokens) exceeds the available context size").
     nohup "$LLAMA_BIN" -m "$CHAT_MODEL_PATH" --alias "$CHAT_ALIAS" \
-      --ctx-size 2048 \
+      --ctx-size 8192 \
       --host 127.0.0.1 --port "$CHAT_PORT" > "$LOG_DIR/chat.log" 2>&1 &
     wait_ready "$CHAT_PORT" chat
   fi

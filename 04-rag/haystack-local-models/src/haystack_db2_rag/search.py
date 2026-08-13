@@ -2,15 +2,18 @@
 
     PYTHONPATH=src .venv/bin/python -m haystack_db2_rag.search "what is M-Lean?"
 
-Add a page number to filter on metadata before the search:
+The flags filter on metadata in Db2 *before* the vector search, so the similarity
+ranking only ever sees the rows that already match:
 
-    PYTHONPATH=src .venv/bin/python -m haystack_db2_rag.search "what are the results?" 4
+    ... .search "what are the results?" --page 4
+    ... .search "what is in Table 1?" --tables-only
+    ... .search "what are the phases?" --section "5. Proposed framework design" --top-k 5
 
-The pipeline is four components:
+Run metadata.py to see which values those fields take. The pipeline is four components:
     text_embedder -> retriever -> prompt_builder -> generator
 """
 
-import sys
+import argparse
 
 from haystack import Pipeline
 from haystack.components.builders import ChatPromptBuilder
@@ -23,12 +26,32 @@ from haystack_integrations.components.retrievers.ibm_db import IBMDb2EmbeddingRe
 from . import settings
 from .store import document_store
 
-question = sys.argv[1] if len(sys.argv) > 1 else "What is M-Lean?"
-filters = (
-    {"field": "meta.page_number", "operator": "==", "value": int(sys.argv[2])}
-    if len(sys.argv) > 2
-    else None
-)
+parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+parser.add_argument("question", nargs="?", default="What is M-Lean?")
+parser.add_argument("--page", type=int, help="only chunks that start on this page")
+parser.add_argument("--section", help="only chunks under this section heading")
+parser.add_argument("--tables-only", action="store_true", help="only chunks containing a table")
+parser.add_argument("--top-k", type=int, default=3, help="how many chunks to retrieve (default 3)")
+args = parser.parse_args()
+
+question = args.question
+
+# Each flag is one condition; several flags are ANDed. This is the same dict shape the
+# store takes in metadata.py — a retriever filter and a metadata query are one language.
+conditions = []
+if args.page is not None:
+    conditions.append({"field": "meta.page_number", "operator": "==", "value": args.page})
+if args.section:
+    conditions.append({"field": "meta.section", "operator": "==", "value": args.section})
+if args.tables_only:
+    conditions.append({"field": "meta.has_table", "operator": "==", "value": True})
+
+if not conditions:
+    filters = None
+elif len(conditions) == 1:
+    filters = conditions[0]
+else:
+    filters = {"operator": "AND", "conditions": conditions}
 
 PROMPT = """Answer the question using only the excerpts below. If they do not contain
 the answer, say that the document does not cover it — do not use any other knowledge.
@@ -53,7 +76,9 @@ pipeline.add_component(
         prefix="Represent this sentence for searching relevant passages: ",
     ),
 )
-pipeline.add_component("retriever", IBMDb2EmbeddingRetriever(document_store=store, top_k=3))
+pipeline.add_component(
+    "retriever", IBMDb2EmbeddingRetriever(document_store=store, top_k=args.top_k)
+)
 pipeline.add_component(
     "prompt_builder", ChatPromptBuilder(template=[ChatMessage.from_user(PROMPT)])
 )
@@ -91,4 +116,6 @@ print(f"\nQ: {question}")
 print(f"\nA: {result['generator']['replies'][0].text}\n")
 print("Retrieved:")
 for doc in documents:
-    print(f"  [{doc.score:.3f}] p.{doc.meta['page_number']} {doc.meta['headings']}: {doc.content[:60]}...")
+    # Docling prepends the headings to each chunk's text, so the preview starts past them.
+    excerpt = " ".join(doc.content.replace(doc.meta["headings"], "", 1).split())
+    print(f"  [{doc.score:.3f}] p.{doc.meta['page_number']} {doc.meta['headings']}: {excerpt[:60]}...")

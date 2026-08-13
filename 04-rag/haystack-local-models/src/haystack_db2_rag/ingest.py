@@ -26,21 +26,33 @@ pdf = sys.argv[1] if len(sys.argv) > 1 else "data/M-Lean_Article.pdf"
 
 
 class SimpleMeta(BaseMetaExtractor):
-    """Keep one page number and the section headings for each chunk.
+    """Keep a small, flat, filterable subset of what Docling knows about each chunk.
 
     Docling's full metadata contains "$ref" keys, and Db2 stores metadata as BSON,
-    which forbids field names starting with "$". So we keep a small flat subset.
+    which forbids field names starting with "$". So we keep a small flat subset —
+    every field here is one you can filter on (see metadata.py).
     """
 
     def extract_chunk_meta(self, chunk):
-        pages = {
-            prov.page_no
-            for item in getattr(chunk.meta, "doc_items", [])
-            for prov in getattr(item, "prov", [])
-        }
+        doc_items = getattr(chunk.meta, "doc_items", [])
+        pages = {prov.page_no for item in doc_items for prov in getattr(item, "prov", [])}
+        page_start = min(pages) if pages else 0
+        headings = getattr(chunk.meta, "headings", None) or []
+        origin = getattr(chunk.meta, "origin", None)
         return {
-            "page_number": min(pages) if pages else 0,
-            "headings": " > ".join(getattr(chunk.meta, "headings", None) or []),
+            "source": getattr(origin, "filename", "") if origin else "",
+            "page_number": page_start,  # kept as the primary page: == filters and `in` work on it
+            "page_start": page_start,
+            # 11 of this PDF's 70 chunks straddle a page break, so the end page is its own field.
+            "page_end": max(pages) if pages else 0,
+            # Metadata comparisons run as strings (see the README's note on range filters).
+            # Zero-padding makes a page range sort correctly in SQL: BETWEEN '0004' AND '0010'
+            # needs no CAST. Through Haystack's filters, use `in` with a list — its range
+            # operators reject strings outright.
+            "page_label": f"{page_start:04d}",
+            "section": headings[0] if headings else "",
+            "headings": " > ".join(headings),
+            "has_table": any(str(getattr(item, "label", "")) == "table" for item in doc_items),
         }
 
     def extract_dl_doc_meta(self, dl_doc):

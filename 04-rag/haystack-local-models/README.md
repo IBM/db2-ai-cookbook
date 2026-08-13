@@ -1,6 +1,6 @@
 # RAG on IBM Db2 12.1.2+ with Haystack, Docling, and local models
 
-> **Last checked 2026-07-29** — verified: 70 chunks ingested, a grounded answer with citations, and the grounding check still declines an unanswerable question.  
+> **Last checked 2026-08-12** — verified: 70 chunks ingested, a grounded answer with citations, metadata filtering (10 table chunks, 33 sections) with both model servers stopped, and the grounding check declining an unanswerable question 10 times out of 10.  
 > Checked on: Db2 12.1.5.0 · RHEL 10 · Python 3.12.
 
 [← Db2 AI Cookbook](../../README.md) · [← RAG module](../README.md)
@@ -10,6 +10,8 @@ vector database and nothing but local models:
 
 - **Vector storage** — native Db2 `VECTOR` columns
 - **Vector similarity** — `VECTOR_DISTANCE` (cosine), through Haystack's Db2 integration
+- **Metadata filtering** — the same rows also answer structured queries (by section, page, or
+  "contains a table"), either on their own or as a pre-filter for the vector search
 - **Document parsing** — [Docling](https://github.com/docling-project/docling) turns a PDF into
   structured, chunked text that keeps its headings and page numbers
 - **Embeddings and generation** — two models running on your own machine, served by
@@ -58,6 +60,9 @@ watsonx.ai — see [Learn more](#learn-more) for that and the other references.
   - [More questions to try](#more-questions-to-try)
 - [How the PDF is chunked](#how-the-pdf-is-chunked-and-why-not-documentsplitter)
 - [Verify the vectors in Db2](#verify-the-vectors-in-db2)
+- [Metadata filtering: the other half of the table](#metadata-filtering-the-other-half-of-the-table)
+  - [Filtering on numbers](#filtering-on-numbers)
+- [Deterministic generation](#deterministic-generation)
 - [Configuration](#configuration)
 - [Troubleshooting](#troubleshooting) → [docs/troubleshooting.md](docs/troubleshooting.md)
 - [Recipe layout](#recipe-layout)
@@ -144,7 +149,7 @@ data/M-Lean_Article.pdf
 
 | # | Component | Haystack class | What it does |
 |---|---|---|---|
-| 1 | `converter` | `DoclingConverter` | Parses the PDF, chunks it with `HybridChunker`, attaches `page_number` + `headings` via `SimpleMeta`. Out: 70 `Document`s with text and metadata, no vectors yet |
+| 1 | `converter` | `DoclingConverter` | Parses the PDF, chunks it with `HybridChunker`, attaches the [filterable metadata](#metadata-filtering-the-other-half-of-the-table) — page, section, `has_table` — via `SimpleMeta`. Out: 70 `Document`s with text and metadata, no vectors yet |
 | 2 | `embedder` | `OpenAIDocumentEmbedder` | Sends each chunk to the embedding server on `:8081`; fills in `.embedding` (384 floats) |
 | 3 | `writer` | `DocumentWriter` | Hands the Documents to `IBMDb2DocumentStore`, which `INSERT`s them into `HAYSTACK_DOCUMENTS` |
 
@@ -179,7 +184,8 @@ Wired as `text_embedder → retriever → prompt_builder → generator`
 ([search.py](src/haystack_db2_rag/search.py)).
 
 **What links the two layers** is not code but three shared facts: the embedding dimension
-(**384**), the distance metric (**cosine**), and the metadata keys (`page_number`, `headings`).
+(**384**), the distance metric (**cosine**), and the metadata keys (`page_number`, `section`,
+`has_table` and the rest — see [Metadata filtering](#metadata-filtering-the-other-half-of-the-table)).
 Change one on one side only and retrieval breaks — silently.
 
 Two llama.cpp servers, because one `llama-server` process serves one model.
@@ -230,11 +236,19 @@ Neither is hung.
 Pass any other document as the argument — PDF, DOCX, or HTML. Drop it in `data/`; only the sample
 PDF is tracked by git, so your own files stay out of the repo.
 
-Add a page number as a second argument to filter on metadata *before* the vector search:
+Add a flag to filter on metadata *before* the vector search — Db2 narrows the rows, then ranks only
+those:
 
 ```bash
-.venv/bin/python -m haystack_db2_rag.search "What does the proposed framework look like?" 4
+.venv/bin/python -m haystack_db2_rag.search "What does the proposed framework look like?" --page 4
+.venv/bin/python -m haystack_db2_rag.search "What is in Table 1?" --tables-only
 ```
+
+`--page`, `--section`, `--tables-only` and `--top-k` are all optional and combine. `--top-k` is
+bounded by the chat server's context window: each chunk is up to 448 tokens, so `--top-k 10` needs
+about 3.2k and the server is started with `--ctx-size 8192` to leave room.
+[Metadata filtering](#metadata-filtering-the-other-half-of-the-table) covers what you can filter on
+and how to query it without asking a question at all.
 
 ## Try it: example questions
 
@@ -253,9 +267,9 @@ A: M-Lean is an end-to-end development framework for predictive models in B2B sc
    particularly in the context of deploying models in business-to-business (B2B) settings.
 
 Retrieved:
-  [0.308] p.1 M-Lean: An end-to-end development framework for predictive models in B2B...
-  [0.418] p.4 5. Proposed framework design: Table 1 Proposed framework vs. ...
-  [0.430] p.4 5. Proposed framework design: build-measure-learn loop is th...
+  [0.309] p.1 M-Lean: An end-to-end development framework...: Mona Nashaat a , ∗ , Aindrila...
+  [0.418] p.4 5. Proposed framework design: Table 1 Proposed framework vs. Lean Startup...
+  [0.430] p.4 5. Proposed framework design: build-measure-learn loop is the core of...
 ```
 
 Lower scores are closer — they are cosine **distances**, not similarities.
@@ -264,15 +278,15 @@ Lower scores are closer — they are cosine **distances**, not similarities.
 every hit comes from page 4:
 
 ```
-$ .venv/bin/python -m haystack_db2_rag.search "What does the proposed framework look like?" 4
+$ .venv/bin/python -m haystack_db2_rag.search "What does the proposed framework look like?" --page 4
 
 A: The proposed framework looks like a structured process divided into three phases, each
    with specific objectives, research questions, and methods for data collection...
 
 Retrieved:
-  [0.298] p.4 5. Proposed framework design: Table 1 Proposed framework vs. ...
-  [0.302] p.4 5.1. Getting more from business data: ideas suggestions and data discovery...
-  [0.315] p.4 5.1. Getting more from business data: ideas suggestions and data discovery...
+  [0.298] p.4 5. Proposed framework design: Table 1 Proposed framework vs. Lean Startup...
+  [0.302] p.4 5.1. Getting more from business data...: The framework starts with a...
+  [0.315] p.4 5.1. Getting more from business data...: Table 2 Outlines of the framework...
 ```
 
 **A question the document cannot answer** — retrieval always returns *something* (the three
@@ -310,7 +324,7 @@ Each is chosen to show a different retrieval behaviour:
 | *Why do predictive models degrade after deployment?* | A **"why" question** whose answer is an argument rather than a stated fact — the model has to synthesize from the retrieved passages |
 | *What is the build-measure-learn loop?* | A concept the paper **borrows from Lean Startup**; a good check that answers stay tied to how *this* paper uses the term |
 | *What are the limitations of this study?* | A **standard section of any paper** — try this one when you swap in your own PDF |
-| *What are the phases of the M-Lean framework?* | Instructive **imperfection**: retrieval favours the build-measure-learn chunk, so the answer describes that loop's stages rather than the paper's exploratory/improving phases. Compare `--top-k` values or add the page filter (`… 4`) and watch the answer change |
+| *What are the phases of the M-Lean framework?* | Instructive **imperfection**: retrieval favours the build-measure-learn chunk, so the answer describes that loop's stages rather than the paper's exploratory/improving phases. Compare `--top-k` values, or add `--section "5. Proposed framework design"`, and watch the answer change |
 
 That last row is worth running deliberately. It shows the thing that matters most in RAG: the
 answer is only ever as good as the chunks the retriever chose, and a confident-sounding answer
@@ -319,10 +333,8 @@ generator setup: the "do not use any other knowledge" sentence in the prompt, *a
 `temperature: 0`. With sampling left on, this same question answered "The capital of France is
 Paris" in 5 of 6 runs.
 
-> **On reproducibility:** at `temperature: 0` the same question gives byte-identical answers —
-> except for the **first** request after a llama.cpp server restart, which differs from every
-> later one because the prompt cache is cold and the numerics differ slightly. If you are
-> comparing outputs, discard the first run after `llama-servers.sh start`.
+> **On reproducibility:** at `temperature: 0` the same question gives byte-identical answers, with
+> one exception — see [Deterministic generation](#deterministic-generation).
 
 ## How the PDF is chunked (and why not DocumentSplitter)
 
@@ -354,8 +366,9 @@ a maximum of 456 — all comfortably inside the window.
 
 **Why the metadata is trimmed.** Db2 stores document metadata as BSON, which forbids field names
 beginning with `$`. Docling's full `dl_meta` contains `$ref` keys, so `ingest.py` passes a small
-`SimpleMeta` extractor keeping just the page number and headings. Without it **every** insert
-fails with `SQL0443N … JSON2BSON`.
+`SimpleMeta` extractor that flattens what it needs — pages, section, `has_table` — into plain keys.
+Without it **every** insert fails with `SQL0443N … JSON2BSON`. What survives is what you can filter
+on: see [Metadata filtering](#metadata-filtering-the-other-half-of-the-table).
 
 ## Verify the vectors in Db2
 
@@ -378,6 +391,137 @@ db2 "SELECT SUBSTR(CONTENT,1,60) FROM HAYSTACK_DOCUMENTS \
        (SELECT EMBEDDING FROM HAYSTACK_DOCUMENTS FETCH FIRST 1 ROWS ONLY), COSINE) \
      FETCH FIRST 3 ROWS ONLY"
 ```
+
+## Metadata filtering: the other half of the table
+
+Vector search is one way to query this table. The other is the **metadata Docling extracted**,
+stored as BSON in the `META` column and queried with ordinary SQL predicates — no embeddings, no
+model servers, no question. A vector database that is also a relational database gives you both,
+and they compose.
+
+`ingest.py` writes eight fields per chunk, all flat and all filterable:
+
+| Field | Type | Example |
+| --- | --- | --- |
+| `source` | text | `M-Lean_Article.pdf` |
+| `page_number` · `page_start` · `page_end` | integer | `4` · `4` · `5` — 11 of the 70 chunks straddle a page break |
+| `page_label` | text | `0004` — zero-padded so a page range sorts correctly in SQL |
+| `section` | text | `5. Proposed framework design` |
+| `headings` | text | `5. Proposed framework design > 5.1. Getting more from business data` |
+| `has_table` | boolean | `true` for the 10 chunks that contain a table |
+
+Run [metadata.py](src/haystack_db2_rag/metadata.py) to explore them. **Neither llama.cpp server has
+to be running** — this is Db2 answering on its own:
+
+```bash
+.venv/bin/python -m haystack_db2_rag.metadata
+```
+
+```
+Metadata fields:
+  has_table        boolean
+  page_number      integer
+  section          text
+  ...
+
+33 sections, from 'Information and Software Technology' to 'References':
+
+has_table == True — 10 chunks
+  p.11  6.3. Phase 2 first development ite Table 5 MVM preliminary results in the first
+  p.4   5. Proposed framework design       build-measure-learn loop is the core of the
+```
+
+The filters are plain dicts, and the operators come from the Db2 integration:
+
+| Operator | Notes |
+| --- | --- |
+| `==` `!=` | any type; `!=` also matches chunks where the field is absent |
+| `>` `>=` `<` `<=` | numbers and ISO date strings only — **see the caveat below** |
+| `in` `not in` | takes a list; the reliable way to express a set of pages |
+| `AND` `OR` `NOT` | take a `conditions` list, and nest |
+
+The same dict either **queries metadata alone**:
+
+```python
+store.filter_documents({"field": "meta.has_table", "operator": "==", "value": True})
+store.count_documents_by_filter({"field": "meta.section", "operator": "==", "value": "8. Conclusions"})
+```
+
+…or **narrows a vector search**, where Db2 applies it *before* ranking, so similarity is computed
+only over rows that already match:
+
+```bash
+.venv/bin/python -m haystack_db2_rag.search "What is in Table 1?" --tables-only
+.venv/bin/python -m haystack_db2_rag.search "What are the phases?" --section "5. Proposed framework design"
+```
+
+It is all one `META` column underneath. This is the SQL the integration generates for
+`meta.page_number == 4`, and you can run it yourself:
+
+```bash
+db2 "SELECT COUNT(*) FROM HAYSTACK_DOCUMENTS \
+     WHERE JSON_VALUE(SYSTOOLS.BSON2JSON(META), '\$.page_number' RETURNING VARCHAR(1000)) = '4'"
+```
+
+**You should see:** 5 — the same count `count_documents_by_filter` returns.
+
+### Filtering on numbers
+
+That `RETURNING VARCHAR(1000)` is the catch. Every metadata comparison in `ibm-db-haystack` 0.2.0
+runs as a **string** comparison, so the `>` `>=` `<` `<=` operators sort lexicographically:
+
+```python
+store.filter_documents({"field": "meta.page_number", "operator": ">=", "value": 2})
+# pages 2-9 only (29 chunks) — 10 to 15 are silently dropped, because "10" < "2" as text
+store.filter_documents({"field": "meta.page_number", "operator": "<=", "value": 12})
+# pages 1, 10, 11, 12 (21 chunks) — not pages 1 through 12
+```
+
+No error, just quietly wrong results — the failure mode worth knowing about before you trust a
+range filter. `==`, `in`, and ranges within one digit width (`4 <= p <= 6`) are all correct.
+
+**Two ways around it.** Through Haystack, use `in` with an explicit list:
+
+```python
+{"field": "meta.page_number", "operator": "in", "value": [10, 11, 12, 13, 14, 15]}  # 34 chunks
+```
+
+In SQL, that is what `page_label` is for — zero-padding makes text order match numeric order, so a
+range needs no `CAST`:
+
+```bash
+db2 "SELECT COUNT(*) FROM HAYSTACK_DOCUMENTS \
+     WHERE JSON_VALUE(SYSTOOLS.BSON2JSON(META), '\$.page_label' RETURNING VARCHAR(1000)) \
+     BETWEEN '0004' AND '0010'"
+```
+
+**You should see:** 24 — the same count as `CAST(… AS INT) BETWEEN 4 AND 10`. Note that
+`page_label` cannot be used with `>=` *through Haystack*: its range operators reject string values
+outright (`FilterError: Operator '>=' requires a numeric value or ISO date string`).
+
+## Deterministic generation
+
+RAG is easier to trust, and far easier to test, when the same question gives the same answer. This
+recipe pins every layer it can:
+
+| Layer | Deterministic? | Why |
+| --- | --- | --- |
+| Embedding + retrieval | **Yes** | Same question → identical ranking and identical scores (`0.298 / 0.302 / 0.315` for the page-4 example above, run after run) |
+| Generation | **Yes**, after the first request | `generation_kwargs={"temperature": 0}` in [search.py](src/haystack_db2_rag/search.py) — greedy decoding, no sampling |
+
+`temperature: 0` is doing more than making output repeatable. It is half of what keeps the system
+**grounded**: with sampling left on, *"What is the capital of France?"* answered "Paris" in 5 of 6
+runs despite the prompt's instruction to use only the excerpts. The instruction and the temperature
+are both load-bearing.
+
+Two caveats when comparing outputs:
+
+- **Discard the first generation after `llama-servers.sh start`.** Its prompt cache is cold, and the
+  numerics differ just enough to change the sampled path. From the second request onward, answers
+  are byte-identical.
+- **Embedding scores can drift in the third decimal after a re-ingest**, because embeddings are
+  recomputed and CPU batching is not bit-stable. Assert on ordering and thresholds, never on exact
+  score equality.
 
 ## Configuration
 
@@ -407,8 +551,9 @@ abort, the `/health` 503 race, and `SQL0443N … JSON2BSON`.
 
 ```
 src/haystack_db2_rag/   settings.py (all config, from .env) · store.py (the Db2 connection)
-                        ingest.py  converter → embedder → writer
-                        search.py  text_embedder → retriever → prompt_builder → generator
+                        ingest.py    converter → embedder → writer
+                        search.py    text_embedder → retriever → prompt_builder → generator
+                        metadata.py  filtering on its own — no embeddings, no model servers
 scripts/                llama-servers.sh  (start · stop · status for both llama.cpp servers)
 data/                   M-Lean_Article.pdf  (the sample document)
 docs/                   test-plan.md  (what to test, and why generation can't be asserted on)

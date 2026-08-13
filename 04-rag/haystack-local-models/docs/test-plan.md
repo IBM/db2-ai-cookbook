@@ -1,6 +1,6 @@
 # Test plan
 
-Scope: the ingestion and search layers of this repo, the Db2 integration they depend on, and the
+Scope: the ingestion, search and metadata layers of this repo, the Db2 integration they depend on, and the
 setup instructions in [README.md](../README.md).
 
 This is a teaching repo, so the goal of testing is not a production SLA. It is:
@@ -68,7 +68,7 @@ Each is one pipeline stage in isolation, so a failure points at one component.
 | ID | What it checks | How | Expected |
 | --- | --- | --- | --- |
 | CMP-01 | Docling parses and chunks | Run `DoclingConverter` alone on the sample PDF | **70** `Document`s (this PDF), all with non-empty `content` |
-| CMP-02 | Metadata is present and flat | Inspect `doc.meta` of every chunk | Every chunk has `page_number` (int) and `headings` (str); **no `dl_meta`**, no key starting with `$` |
+| CMP-02 | Metadata is present and flat | Inspect `doc.meta` of every chunk | Every chunk has `source`, `page_number`/`page_start`/`page_end` (int), `page_label` (zero-padded str), `section`, `headings`, `has_table` (bool); **no `dl_meta`**, no key starting with `$`, no nested values |
 | CMP-03 | Chunk budget is respected | Tokenize each chunk with `BAAI/bge-small-en-v1.5` | **Max ≤ 512**; on this PDF median ≈ 331, max ≈ 456 |
 | CMP-04 | Document embedder | `OpenAIDocumentEmbedder.run()` on one Document | `len(doc.embedding) == 384`, all floats |
 | CMP-05 | Text embedder + query prefix | `OpenAITextEmbedder.run(text=...)` | Length 384; the bge query prefix is applied |
@@ -77,6 +77,9 @@ Each is one pipeline stage in isolation, so a failure points at one component.
 | CMP-08 | Metadata filter | Same, with `filters={"field": "meta.page_number", "operator": "==", "value": 4}` | Every returned doc has `page_number == 4`; count ≤ `top_k` |
 | CMP-09 | Prompt rendering | `ChatPromptBuilder.run(documents=[...], question=...)` | One `ChatMessage`; contains each doc's content and the question |
 | CMP-10 | Generator | `OpenAIChatGenerator.run([ChatMessage...])` | Non-empty `replies[0].text` |
+| CMP-11 | Metadata helpers | `get_metadata_fields_info()`, `get_metadata_field_unique_values("section")`, `get_metadata_field_min_max("page_number")` | 10 fields with `has_table` typed **boolean** and `page_number` **integer**; 33 non-empty sections; `{'min': 1.0, 'max': 15.0}` |
+| CMP-12 | Structural filter, no vector | `filter_documents({"field": "meta.has_table", "operator": "==", "value": True})` | **10** chunks on this PDF, matching Docling's table count; runs with both llama.cpp servers **stopped** |
+| CMP-13 | Compound filter | `AND` of `section == "5. Proposed framework design"` and `has_table == True` | 2 chunks, both `p.4`; `count_documents_by_filter` agrees with `len(filter_documents(...))` |
 
 ---
 
@@ -105,8 +108,10 @@ The tests that actually measure whether the system is *good*, not merely running
 | RET-02 | Ranking is deterministic | Run RET-01 twice | Identical ordering and identical `id`s (scores may differ in the 3rd decimal only after a re-ingest) |
 | RET-03 | Filter narrows correctly | `search "..." 4` | **All** hits `p.4`; result set is a subset of the unfiltered run |
 | RET-04 | Grounding holds | Ask `"What is the capital of France?"`, **10 times** | All 10 decline; none asserts "Paris". This test found a real regression: with the refusal sentence missing from the prompt and sampling on, 5 of 6 runs answered "The capital of France is Paris" |
-| RET-05 | `top_k` is honoured | Set `top_k` to 1 and 10 | Exactly 1 and 10 retrieved lines |
+| RET-05 | `top_k` is honoured | `search "…" --top-k 1` and `--top-k 10` | Exactly 1 and 10 retrieved lines |
 | RET-06 | Query prefix matters | Remove the bge query prefix and re-run RET-01 | Scores change measurably — documents the prefix is doing work (informational, not pass/fail) |
+| RET-07 | Filter composes with vector search | `search "What is in Table 1?" --tables-only` | Every hit has `has_table` true; the result set is a subset of the unfiltered run |
+| RET-08 | Filter flags are equivalent to the old positional arg | `search "What does the proposed framework look like?" --page 4` | Same three hits and scores as the README records (`0.298 / 0.302 / 0.315`) |
 
 RET-04 is the single most important regression test in this plan: it is the one that fails when a
 prompt edit quietly turns a grounded RAG system back into a chatbot.
@@ -142,6 +147,7 @@ because each has already happened once.
 | REG-04 | llama.cpp build pulls a mismatched prebuilt web UI | Build with the two `-DLLAMA_*_UI=OFF` flags | `Built target llama-server`, no `loading.html` error |
 | REG-06 | One zero-vector row silently kills **all** search | Write a Document with `embedding=[0.0]*384`, run any query, then delete it and re-query | With the row: **0 hits** (and `SQL0801N` division by zero if the same ranking query is run in the `db2` CLI). Without it: `top_k` hits again |
 | REG-05 | Class names drifted from the blog (`Db2DocumentStore` → `IBMDb2DocumentStore`) | `python -c "from haystack_integrations.document_stores.ibm_db import IBMDb2DocumentStore"` | Imports cleanly; pinned by `requirements.txt` |
+| REG-07 | Metadata range filters compare as **strings**, so `page_number >= 2` silently drops pages 10–15 | `filter_documents` with `>= 2` and with `<= 12`; then the documented workaround, `in [10..15]` | `>= 2` → pages 2–9 (29 chunks); `<= 12` → pages 1, 10, 11, 12 (21 chunks); `in` → pages 10–15 (34 chunks). The first two are the *documented* behaviour of `ibm-db-haystack` 0.2.0 — if a future version fixes them, the README's [Filtering on numbers](../README.md#filtering-on-numbers) section is what needs updating |
 
 ---
 
