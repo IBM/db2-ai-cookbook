@@ -68,7 +68,7 @@ Each is one pipeline stage in isolation, so a failure points at one component.
 | ID | What it checks | How | Expected |
 | --- | --- | --- | --- |
 | CMP-01 | Docling parses and chunks | Run `DoclingConverter` alone on the sample PDF | **70** `Document`s (this PDF), all with non-empty `content` |
-| CMP-02 | Metadata is present and flat | Inspect `doc.meta` of every chunk | Every chunk has `source`, `page_number`/`page_start`/`page_end` (int), `page_label` (zero-padded str), `section`, `headings`, `has_table` (bool); **no `dl_meta`**, no key starting with `$`, no nested values |
+| CMP-02 | Metadata is present and flat | Inspect `doc.meta` of every chunk | Every chunk has `source`, `page_number`/`page_start`/`page_end` (int), `section`, `headings`, `has_table` (bool); **no `dl_meta`**, no key starting with `$`, no nested values |
 | CMP-03 | Chunk budget is respected | Tokenize each chunk with `BAAI/bge-small-en-v1.5` | **Max ≤ 512**; on this PDF median ≈ 331, max ≈ 456 |
 | CMP-04 | Document embedder | `OpenAIDocumentEmbedder.run()` on one Document | `len(doc.embedding) == 384`, all floats |
 | CMP-05 | Text embedder + query prefix | `OpenAITextEmbedder.run(text=...)` | Length 384; the bge query prefix is applied |
@@ -77,7 +77,7 @@ Each is one pipeline stage in isolation, so a failure points at one component.
 | CMP-08 | Metadata filter | Same, with `filters={"field": "meta.page_number", "operator": "==", "value": 4}` | Every returned doc has `page_number == 4`; count ≤ `top_k` |
 | CMP-09 | Prompt rendering | `ChatPromptBuilder.run(documents=[...], question=...)` | One `ChatMessage`; contains each doc's content and the question |
 | CMP-10 | Generator | `OpenAIChatGenerator.run([ChatMessage...])` | Non-empty `replies[0].text` |
-| CMP-11 | Metadata helpers | `get_metadata_fields_info()`, `get_metadata_field_unique_values("section")`, `get_metadata_field_min_max("page_number")` | 10 fields with `has_table` typed **boolean** and `page_number` **integer**; 33 non-empty sections; `{'min': 1.0, 'max': 15.0}` |
+| CMP-11 | Metadata helpers | `get_metadata_fields_info()`, `get_metadata_field_unique_values("section")`, `get_metadata_field_min_max("page_number")` | 9 fields with `has_table` typed **boolean** and `page_number` **integer**; 33 non-empty sections; `{'min': 1.0, 'max': 15.0}` |
 | CMP-12 | Structural filter, no vector | `filter_documents({"field": "meta.has_table", "operator": "==", "value": True})` | **10** chunks on this PDF, matching Docling's table count; runs with both llama.cpp servers **stopped** |
 | CMP-13 | Compound filter | `AND` of `section == "5. Proposed framework design"` and `has_table == True` | 2 chunks, both `p.4`; `count_documents_by_filter` agrees with `len(filter_documents(...))` |
 

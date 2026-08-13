@@ -41,15 +41,12 @@ class SimpleMeta(BaseMetaExtractor):
         origin = getattr(chunk.meta, "origin", None)
         return {
             "source": getattr(origin, "filename", "") if origin else "",
-            "page_number": page_start,  # kept as the primary page: == filters and `in` work on it
+            # Filter this one with == or `in` — a list, not a range. See "Filtering on
+            # numbers" in the README for why > and >= mislead.
+            "page_number": page_start,
             "page_start": page_start,
             # 11 of this PDF's 70 chunks straddle a page break, so the end page is its own field.
             "page_end": max(pages) if pages else 0,
-            # Metadata comparisons run as strings (see the README's note on range filters).
-            # Zero-padding makes a page range sort correctly in SQL: BETWEEN '0004' AND '0010'
-            # needs no CAST. Through Haystack's filters, use `in` with a list — its range
-            # operators reject strings outright.
-            "page_label": f"{page_start:04d}",
             "section": headings[0] if headings else "",
             "headings": " > ".join(headings),
             "has_table": any(str(getattr(item, "label", "")) == "table" for item in doc_items),

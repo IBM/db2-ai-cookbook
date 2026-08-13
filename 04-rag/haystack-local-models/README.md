@@ -372,7 +372,12 @@ on: see [Metadata filtering](#metadata-filtering-the-other-half-of-the-table).
 
 ## Verify the vectors in Db2
 
-The vectors are ordinary Db2 data — you can inspect them without Python:
+> **This section is the one place the tutorial leaves Python.** Nothing here is application code —
+> you never write SQL to build this system, and the two chapters around this one don't. It is here
+> to prove a point that the Python API cannot: that Db2 is storing these vectors *natively*.
+
+The vectors are ordinary Db2 data — you can inspect them from the `db2` CLI, with no application
+running:
 
 ```bash
 db2 connect to SAMPLE
@@ -392,6 +397,9 @@ db2 "SELECT SUBSTR(CONTENT,1,60) FROM HAYSTACK_DOCUMENTS \
      FETCH FIRST 3 ROWS ONLY"
 ```
 
+Your data is not locked inside a framework — but you never need this to *use* it. Back to Python
+for the rest of the recipe.
+
 ## Metadata filtering: the other half of the table
 
 Vector search is one way to query this table. The other is the **metadata Docling extracted**,
@@ -399,13 +407,12 @@ stored as BSON in the `META` column and queried with ordinary SQL predicates —
 model servers, no question. A vector database that is also a relational database gives you both,
 and they compose.
 
-`ingest.py` writes eight fields per chunk, all flat and all filterable:
+`ingest.py` writes seven fields per chunk, all flat and all filterable:
 
 | Field | Type | Example |
 | --- | --- | --- |
 | `source` | text | `M-Lean_Article.pdf` |
 | `page_number` · `page_start` · `page_end` | integer | `4` · `4` · `5` — 11 of the 70 chunks straddle a page break |
-| `page_label` | text | `0004` — zero-padded so a page range sorts correctly in SQL |
 | `section` | text | `5. Proposed framework design` |
 | `headings` | text | `5. Proposed framework design > 5.1. Getting more from business data` |
 | `has_table` | boolean | `true` for the 10 chunks that contain a table |
@@ -455,20 +462,14 @@ only over rows that already match:
 .venv/bin/python -m haystack_db2_rag.search "What are the phases?" --section "5. Proposed framework design"
 ```
 
-It is all one `META` column underneath. This is the SQL the integration generates for
-`meta.page_number == 4`, and you can run it yourself:
-
-```bash
-db2 "SELECT COUNT(*) FROM HAYSTACK_DOCUMENTS \
-     WHERE JSON_VALUE(SYSTOOLS.BSON2JSON(META), '\$.page_number' RETURNING VARCHAR(1000)) = '4'"
-```
-
-**You should see:** 5 — the same count `count_documents_by_filter` returns.
+You never write SQL for any of this. The integration turns these dicts into predicates against the
+`META` column, opens and closes the connection, and hands back `Document` objects — the same way
+`DocumentWriter` put them there in the first place.
 
 ### Filtering on numbers
 
-That `RETURNING VARCHAR(1000)` is the catch. Every metadata comparison in `ibm-db-haystack` 0.2.0
-runs as a **string** comparison, so the `>` `>=` `<` `<=` operators sort lexicographically:
+One behaviour to know about. Metadata comparisons in `ibm-db-haystack` 0.2.0 are made as **strings**,
+so the `>` `>=` `<` `<=` operators sort lexicographically:
 
 ```python
 store.filter_documents({"field": "meta.page_number", "operator": ">=", "value": 2})
@@ -480,24 +481,16 @@ store.filter_documents({"field": "meta.page_number", "operator": "<=", "value": 
 No error, just quietly wrong results — the failure mode worth knowing about before you trust a
 range filter. `==`, `in`, and ranges within one digit width (`4 <= p <= 6`) are all correct.
 
-**Two ways around it.** Through Haystack, use `in` with an explicit list:
+**The fix is `in` with an explicit list** — it compares each value on its own, so text ordering
+never enters into it:
 
 ```python
-{"field": "meta.page_number", "operator": "in", "value": [10, 11, 12, 13, 14, 15]}  # 34 chunks
+store.filter_documents(
+    {"field": "meta.page_number", "operator": "in", "value": [10, 11, 12, 13, 14, 15]}
+)  # 34 chunks — every chunk on pages 10 to 15
 ```
 
-In SQL, that is what `page_label` is for — zero-padding makes text order match numeric order, so a
-range needs no `CAST`:
-
-```bash
-db2 "SELECT COUNT(*) FROM HAYSTACK_DOCUMENTS \
-     WHERE JSON_VALUE(SYSTOOLS.BSON2JSON(META), '\$.page_label' RETURNING VARCHAR(1000)) \
-     BETWEEN '0004' AND '0010'"
-```
-
-**You should see:** 24 — the same count as `CAST(… AS INT) BETWEEN 4 AND 10`. Note that
-`page_label` cannot be used with `>=` *through Haystack*: its range operators reject string values
-outright (`FilterError: Operator '>=' requires a numeric value or ISO date string`).
+`get_metadata_field_min_max("page_number")` gives you the bounds to build that list from.
 
 ## Deterministic generation
 
