@@ -1,0 +1,41 @@
+:root {
+  --bg-color: #ffffff;
+  --text-color: #000000;
+  --divider-color: #dcdcdc;
+  --accent-color: #1976d2;
+  --icon-color: #888888;
+}
+
+
+[data-theme='dark'] {
+  --bg-color: #121212;
+  --text-color: #f5f5f5;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background 0.3s, color 0.3s;
+}
+
+
+.main-content {
+  margin-left: 250px;
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+  background-color: var(--bg-color);
+}
+
+@media (max-width: 600px) {
+  .main-content {
+    margin-left: 0;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 400px) {
+  .main-content {
+    padding: 10px;
+  }
+}

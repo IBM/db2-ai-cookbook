@@ -1,0 +1,46 @@
+
+/* ShoeList.css */
+.shoe-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 32px; /* Adjust gap between items */
+  margin-left: 250px;
+  padding: 40px;
+  background-color: var(--bg-color);
+  margin-top: 150px;
+  box-sizing: border-box; /* Ensures padding doesn't overflow */
+}
+
+/* ShoeList.css */
+.loading-container {
+  text-align: center;
+  padding: 2rem;
+  color: aqua;
+}
+
+/* Shoe card container */
+.shoe-card-container {
+  width: 100%;
+  background-color: var(--bg-color);
+  max-width: 400px;
+  box-sizing: border-box; 
+}
+
+@media (max-width: 900px) {
+  .shoe-card-container {
+    width: 48%; 
+  }
+}
+
+@media (max-width: 600px) {
+  .shoe-card-container {
+    width: 100%; 
+  }
+}
+
+@media (min-width: 1200px) {
+  .shoe-list {
+    justify-content: space-around; 
+  }
+}

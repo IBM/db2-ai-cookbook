@@ -1,0 +1,74 @@
+/* CategoryBar.css */
+.category-bar {
+  position: absolute;
+  top: 90px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 36px;
+  padding: 16px 0;
+  flex-wrap: wrap;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  z-index: 999;
+}
+  
+  .category-item {
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+    padding: 8px 16px; /* Add padding for clickable area */
+    background-color: var(--bg-color);
+    text-align: center; /* Ensure the text is centered */
+    white-space: nowrap; /* Prevent text from wrapping */
+  }
+  
+  .category-item:hover {
+    text-decoration: underline;
+  }
+  
+
+/* Preventing overlap on smaller screens */
+@media (max-width: 900px) {
+    .category-bar {
+      gap: 16px;
+      margin-top: 80px; /* Added margin to prevent overlap */
+    }
+  
+    .category-item {
+      font-size: 0.875rem;
+      padding: 8px 12px;
+    }
+  }
+  
+  /* For smaller screens */
+  @media (max-width: 600px) {
+    .category-bar {
+      gap: 8px;
+      margin-top: 100px; /* Increased margin-top for smaller screens */
+    }
+  
+    .category-item {
+      font-size: 0.875rem;
+      padding: 6px 10px;
+      flex: 1 1 100%;
+      text-align: center;
+    }
+  }
+  
+  /* For very small screens */
+  @media (max-width: 400px) {
+    .category-bar {
+      gap: 4px;
+      margin-top: 120px; /* Increased margin-top to prevent overlap */
+    }
+  
+    .category-item {
+      font-size: 0.75rem;
+      padding: 6px 8px;
+      flex: 1 1 100%;
+    }
+  }
