@@ -1,0 +1,118 @@
+/* ShoeCard.css */
+/* .shoe-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 8px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.shoe-card:hover {
+  transform: scale(1.03);
+}
+
+.shoe-image {
+  width: 50%;
+  height: 200px;
+  object-fit: fill;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.color-avatar {
+  width: 18px;
+  height: 18px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.shoe-card .MuiTypography-root {
+  text-align: center;
+}
+
+.shoe-card .MuiRating-root {
+  margin-top: 8px;
+}
+
+.shoe-card .color-avatar {
+  width: 20px;
+  height: 20px;
+} */
+/* ShoeCard.css */
+.shoe-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 8px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box; /* Ensures that padding is included in width */
+  }
+  
+  .shoe-card:hover {
+    transform: scale(1.03);
+  }
+  
+  .shoe-image {
+    width: 100%;
+    height: auto;
+    max-width: 250px; /* Ensures the image fits within the card */
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .color-avatar {
+    width: 18px;
+    height: 18px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+  }
+  
+  .shoe-card .MuiTypography-root {
+    text-align: center;
+  }
+  
+  .shoe-card .MuiRating-root {
+    margin-top: 8px;
+  }
+  
+  .shoe-card .color-avatar {
+    width: 20px;
+    height: 20px;
+  }
+  
+  @media (max-width: 600px) {
+    .shoe-card .MuiTypography-root {
+      font-size: 14px; /* Make text size smaller on smaller screens */
+    }
+    .shoe-image {
+      max-width: 100%; /* Image takes full width on smaller screens */
+    }
+  }
+  
+  @media (min-width: 600px) and (max-width: 900px) {
+    .shoe-card .MuiTypography-root {
+      font-size: 16px; /* Adjust text size for medium screens */
+    }
+  }
+  
+  @media (min-width: 900px) {
+    .shoe-card .MuiTypography-root {
+      font-size: 18px; /* Larger text on bigger screens */
+    }
+  }
+  

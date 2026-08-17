@@ -1,0 +1,79 @@
+/* Header.css */
+
+/* Mobile styles */
+@media (max-width: 900px) {
+    .header {
+      height: 80px;
+      padding: 1rem;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      width: 100%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      justify-content: center;
+    }
+  
+    .header h1 {
+      font-size: 1.5rem;
+      color: var(--text-color);
+      font-family: fantasy;
+      margin: 0;
+    }
+  
+    .header p {
+      font-size: 0.9rem;
+      font-family: cursive;
+      color: var(--text-color);
+      background-color: var(--bg-color);
+    }
+  
+    .theme-switcher {
+      top: 0.5rem;
+      position: absolute;
+      right: 1rem;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+  }
+  
+  /* Desktop styles */
+  @media (min-width: 901px) {
+    .header {
+      height: 90px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+  
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--text-color);
+      background-color: var(--bg-color);
+      margin: 0;
+      font-family: fantasy;
+    }
+  
+    .header p {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--text-color);
+      background-color: var(--bg-color);
+      font-family: cursive;
+    }
+  
+    .theme-switcher {
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+    }
+  }
+  
