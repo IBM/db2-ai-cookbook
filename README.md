@@ -1,6 +1,6 @@
 ![Db2 AI Cookbook — recipes for building AI apps and agents](docs/images/cover.png)
 
-> Practical, runnable recipes for building AI features on IBM Db2 — embeddings, vector search, and the surrounding plumbing. Every recipe is minimal by design, so the moving parts stay visible.
+> Practical, runnable recipes for building AI features on IBM Db2 — embeddings, vector search, in-database machine learning, and the surrounding plumbing. Every recipe is minimal by design, so the moving parts stay visible.
 
 ![Db2](https://img.shields.io/badge/Db2-12.1%2B-054ada)
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
@@ -38,6 +38,7 @@ Pick a module, pick a recipe inside it, follow the Quick start.
 | [04-rag](04-rag/) | Retrieval-augmented generation over your own documents, with Db2 as the vector database. Chunk a source document, embed and store the chunks, retrieve the closest ones for a question with `VECTOR_DISTANCE`, and have a local language model answer from those excerpts alone. Three recipes solve this different ways — Haystack over a PDF, LangChain over a web article, and one with no framework at all that calls a hosted watsonx.ai model — so you can see which parts of a RAG pipeline are essential and which are framework flavour. A fifth is an always-on FastAPI app that captures what you read into Db2 — the front half of the same pipeline, built to keep running. | **Db2 12.1.2+** · Python + local models, or watsonx.ai | 5 |
 | [05-agentic-rag](05-agentic-rag/) | RAG that checks its own work. A LangGraph agent grades the documents it retrieved, and when they don't answer the question it rewrites the query and retries rather than answering from bad context. Shows the pipeline twice — once as a notebook prototype, then split into three FastAPI microservices behind a gateway, which is the step most RAG tutorials skip. | **Db2 12.1.2+** · Python + local embeddings + watsonx.ai | 1 |
 | [06-recommendation](06-recommendation/) | Item-to-item recommendation: "find me something like this one — that I can actually get". Product attributes become a vector, `VECTOR_DISTANCE` ranks the catalogue, and store, size and stock filter it in the same statement — because a recommendation nobody can buy is worthless. | **Db2 12.1.2+** · Python + watsonx.ai · Flask + React | 2 |
+| [07-in-database-ml](07-in-database-ml/) | Classical supervised learning, in SQL. Db2's IDAX stored procedures split a table, fill its gaps, fit a regression model and measure it — every step a `CALL`, with the data never leaving the database. Predicts what a customer will spend from attributes you already hold. A branch rather than a next step: it assumes nothing from the modules before it. | **Db2 12.1 + IDAX enabled** · SQL only, or Python for the walkthrough | 1 |
 
 More modules are on the way. See [Adding a module](#adding-a-module) below.
 
@@ -63,6 +64,8 @@ Recipes that persist vectors need **Db2 12.1.2 or later** — that is where the 
 One module asks for less: [01-tabular-search](01-tabular-search/) is SQL only — no Python, no virtualenv, no models — and its table ships with the `SAMPLE` database on Db2 12.1.2+, so it needs no setup at all.
 
 One module asks for more: [03-hybrid-search](03-hybrid-search/) needs **Db2 12.1.5** plus OpenSearch, because it uses Db2 Text Search and in-database `TO_EMBEDDING` rather than just the `VECTOR` type.
+
+One module asks for something different: [07-in-database-ml](07-in-database-ml/) uses no vectors at all. It needs the IDAX stored procedures enabled and its own **16K page-size** database rather than `SAMPLE` — a few minutes of one-time setup, spelled out in the recipe.
 
 Anything host-specific — OS package fixes, model downloads, build-from-source paths — lives in the relevant module or recipe README, not here.
 
@@ -96,6 +99,9 @@ db2-ai-cookbook/
 │   ├── shoe-search-watsonx/
 │   ├── shoe-store-flask-react/
 │   └── README.md
+├── 07-in-database-ml/            # train a regression model inside Db2, in SQL
+│   ├── gosales-linear-regression/
+│   └── README.md
 ├── LICENSE
 └── README.md                     # you are here
 ```
@@ -123,6 +129,10 @@ Don't repeat what the path already says. A module folder names the **capability*
 
 Modules are numbered in reading order — each builds on the one before it. Inserting a module
 means renumbering the ones after it, which is cheap and worth doing.
+
+A module that is a *branch* rather than a step — [07-in-database-ml](07-in-database-ml/) is one —
+still takes the next number, but says so in its own README so nobody reads it as a prerequisite
+for what follows.
 
 ### Recipe README shape
 

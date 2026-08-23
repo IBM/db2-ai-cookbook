@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Who is worth reaching?</title>
+<style>
+  :root{
+    --bg:#141416; --panel:#1c1c1f; --panel-2:#232327; --line:#33333a;
+    --ink:#ffffff; --ink-2:#c3c2b7; --ink-3:#8b8a82;
+    --pos:#3987e5;      /* diverging: adds spend */
+    --neg:#e66767;      /* diverging: reduces spend */
+    --mid:#383835;      /* neutral midpoint */
+    --accent:#3987e5;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 32px 96px;min-height:100%}
+
+  /* ---------- progress ---------- */
+  .rail{display:flex;gap:8px;margin-bottom:30px}
+  .rail div{height:3px;flex:1;background:var(--line);border-radius:2px;transition:background .25s}
+  .rail div.on{background:var(--accent)}
+
+  /* ---------- scene ---------- */
+  .scene{display:none;animation:fade .3s ease}
+  .scene.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px}
+  h1{font-size:clamp(30px,4.2vw,52px);line-height:1.1;margin:0 0 16px;letter-spacing:-.02em;font-weight:650}
+  .lede{font-size:clamp(17px,1.7vw,21px);color:var(--ink-2);max-width:70ch;margin:0 0 26px}
+  .lede strong{color:var(--ink);font-weight:600}
+
+  /* ---------- stats ---------- */
+  .stats{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 24px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;min-width:150px}
+  .stat b{display:block;font-size:clamp(24px,3vw,34px);line-height:1.15;letter-spacing:-.02em}
+  .stat span{color:var(--ink-3);font-size:13px}
+
+  /* ---------- table ---------- */
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th{text-align:left;color:var(--ink-3);font-weight:500;font-size:12px;letter-spacing:.08em;
+     text-transform:uppercase;padding:0 12px 8px;border-bottom:1px solid var(--line)}
+  td{padding:9px 12px;border-bottom:1px solid #232327;color:var(--ink-2)}
+  td.n{color:var(--ink);font-variant-numeric:tabular-nums}
+  .gap{color:var(--neg);font-style:italic}
+
+  /* ---------- drivers chart ---------- */
+  .chart{display:grid;grid-template-columns:190px 1fr 86px;gap:3px 14px;align-items:center}
+  .chart .lbl{font-size:14px;color:var(--ink-2);text-align:right;white-space:nowrap;
+               overflow:hidden;text-overflow:ellipsis}
+  .track{position:relative;height:22px}
+  .track::before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--mid)}
+  .bar{position:absolute;top:3px;height:16px;border-radius:3px}
+  .bar.p{left:50%;background:var(--pos);border-radius:0 4px 4px 0;margin-left:1px}
+  .bar.n{right:50%;background:var(--neg);border-radius:4px 0 0 4px;margin-right:1px}
+  .val{font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .val.neg{color:var(--ink-2)}
+  .axis{grid-column:2;color:var(--ink-3);font-size:12px;display:flex;justify-content:space-between;padding-top:6px}
+
+  /* ---------- predictor ---------- */
+  .cols{display:grid;grid-template-columns:1fr 320px;gap:28px;align-items:start}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+               color:var(--ink-3);margin-bottom:5px}
+  select,input[type=number]{
+    width:100%;background:var(--panel-2);color:var(--ink);border:1px solid var(--line);
+    border-radius:9px;padding:11px 12px;font-size:16px;font-family:inherit}
+  .personas{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .chip{background:var(--panel-2);border:1px solid var(--line);color:var(--ink-2);
+        border-radius:999px;padding:7px 14px;font-size:14px;cursor:pointer;font-family:inherit}
+  .chip:hover{border-color:var(--accent);color:var(--ink)}
+  .result{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+          padding:26px;text-align:center}
+  .result .big{font-size:clamp(40px,6vw,68px);font-weight:650;letter-spacing:-.03em;line-height:1.05}
+  .result .cap{color:var(--ink-3);font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+  .result .sub{color:var(--ink-3);font-size:13px;margin-top:10px}
+
+  /* ---------- buttons ---------- */
+  button{font-family:inherit}
+  .btn{background:var(--accent);color:#fff;border:0;border-radius:10px;
+       padding:15px 30px;font-size:17px;font-weight:600;cursor:pointer}
+  .btn:disabled{opacity:.55;cursor:default}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink-2)}
+
+  /* ---------- steps ---------- */
+  .steps{list-style:none;padding:0;margin:20px 0 0;max-width:560px}
+  .steps li{display:flex;justify-content:space-between;gap:12px;padding:11px 0;
+            border-bottom:1px solid #232327;color:var(--ink-2);opacity:0;transform:translateX(-6px)}
+  .steps li.in{opacity:1;transform:none;transition:all .3s}
+  .steps li b{color:var(--ink);font-variant-numeric:tabular-nums;font-weight:500}
+  .tick{color:var(--pos);margin-right:9px}
+
+  /* ---------- sql panel ---------- */
+  .sql{margin-top:26px;max-width:900px}
+  .sql summary{cursor:pointer;color:var(--ink-3);font-size:14px;list-style:none;
+               display:inline-flex;align-items:center;gap:7px;padding:7px 13px;
+               border:1px solid var(--line);border-radius:8px}
+  .sql summary::-webkit-details-marker{display:none}
+  .sql summary:hover{color:var(--ink);border-color:var(--accent)}
+  .sql[open] summary{color:var(--ink);border-color:var(--accent)}
+  .sql pre{background:#0e0e10;border:1px solid var(--line);border-radius:10px;
+           padding:18px;overflow-x:auto;margin:12px 0 0;
+           font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d6d5cc}
+  .sql .kw{color:#7fb6f2}
+  .sql .str{color:#9fd8a8}
+  .sql .cm{color:#6f6e67;font-style:italic}
+
+  /* ---------- provenance tags ---------- */
+  .tag{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.1em;
+       text-transform:uppercase;padding:5px 11px;border-radius:999px;margin-bottom:10px;font-weight:600}
+  .tag::before{content:"";width:7px;height:7px;border-radius:50%}
+  .tag.data{background:#22262b;color:#9fb4c9}          .tag.data::before{background:#7f96ad}
+  .tag.q{background:#2b2320;color:#e8a98f}             .tag.q::before{background:var(--neg)}
+  .tag.model{background:#1b2c44;color:#8fc0f5}         .tag.model::before{background:var(--pos)}
+
+  /* ---------- waffle ---------- */
+  .cols2{display:grid;grid-template-columns:auto 1fr;gap:34px;align-items:start;margin-bottom:26px}
+  @media(max-width:860px){.cols2{grid-template-columns:1fr}}
+  .waffle{display:grid;grid-template-columns:repeat(20,1fr);gap:4px;width:min(360px,100%)}
+  .waffle i{aspect-ratio:1;border-radius:2px;background:var(--pos);opacity:.9}
+  .waffle i.u{background:transparent;border:1.5px solid var(--neg)}
+  .waffle i.h{background:transparent;border:1.5px solid #4a4a52}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;color:var(--ink-3);font-size:13px}
+  .legend i.sw{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:7px;
+                vertical-align:-1px}
+  .sw.known{background:var(--pos)} .sw.unknown{border:1.5px solid var(--neg)}
+  .sw.held{border:1.5px solid #4a4a52} .sw.pred{background:var(--pos)} .sw.act{background:#d95926}
+
+  /* ---------- split tables ---------- */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin:0 0 8px}
+  @media(max-width:860px){.split{grid-template-columns:1fr}}
+  .split>div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  .split>div.ask{border-color:#5a3a34;background:#1e1a19}
+  .cap2{color:var(--ink-3);font-size:13px;margin:0 0 12px}
+  .mini{font-size:13px;margin:12px 0 0}
+  td.unk{color:var(--neg);font-weight:700;font-size:19px;letter-spacing:.06em}
+  .want{margin:22px 0 26px;font-weight:500;color:var(--ink)}
+  .want::before{content:"↳ ";color:var(--pos)}
+
+  /* ---------- dumbbell: predicted vs actual ---------- */
+  .dumb{display:grid;grid-template-columns:150px 1fr 92px;gap:2px 14px;align-items:center}
+  .dumb .who{font-size:14px;color:var(--ink-2);text-align:right;white-space:nowrap}
+  .dumb .row{position:relative;height:30px}
+  .dumb .link{position:absolute;top:14px;height:2px;background:#4a4a52}
+  .dumb .pt{position:absolute;top:9px;width:12px;height:12px;border-radius:50%;
+             margin-left:-6px;box-shadow:0 0 0 2px var(--bg)}
+  .dumb .pt.p{background:var(--pos)} .dumb .pt.a{background:#d95926}
+  .dumb .miss{font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+  .dumb .scale{grid-column:2;display:flex;justify-content:space-between;color:var(--ink-3);
+               font-size:12px;padding-top:8px;border-top:1px solid var(--line);margin-top:6px}
+
+  /* ---------- nav ---------- */
+  .nav{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(transparent,var(--bg) 34%);
+       padding:26px 32px 20px}
+  .nav .in{max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+  .hint{color:var(--ink-3);font-size:13px}
+  .villain{border-left:3px solid var(--neg);padding:4px 0 4px 16px;margin:0 0 24px;
+           color:var(--ink-2);max-width:66ch}
+  .muted{color:var(--ink-3);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="rail" id="rail"></div>
+
+  <!-- ============ 1. THE PROBLEM ============ -->
+  <section class="scene on" data-i="0">
+    <div class="kicker">Great Outdoors · Customer marketing</div>
+    <h1 id="h1">You know what your customers spent.<br>Except for the ones you don't.</h1>
+    <p class="lede" id="lede1"></p>
+
+    <div class="split">
+      <div>
+        <div class="tag data">Customers who have bought</div>
+        <div class="cap2">We know exactly what each one spent</div>
+        <table id="sample"></table>
+        <p class="muted mini" id="known-n"></p>
+      </div>
+      <div class="ask">
+        <div class="tag q">Customers who haven't bought yet</div>
+        <div class="cap2">We know who they are — not what they will spend</div>
+        <table id="pending"></table>
+        <p class="muted mini" id="unknown-n"></p>
+      </div>
+    </div>
+
+    <p class="lede want">So we can put the budget on the ones likely to spend
+      most — and close those sales.</p>
+
+    <div class="cols2">
+      <div>
+        <div class="waffle" id="waffle1"></div>
+        <div class="legend">
+          <span><i class="sw known"></i>Spend known</span>
+          <span><i class="sw unknown"></i>Spend unknown — the question</span>
+        </div>
+      </div>
+      <div class="villain">
+        The usual answer is to export it all. Extract the table, hand it to a data
+        science team, wait a quarter, hope a model comes back — and now customer
+        records live in three more places.
+      </div>
+    </div>
+    <p class="muted" id="gaps"></p>
+    <details class="sql"><summary>Show the SQL</summary><pre id="sql-overview"></pre></details>
+  </section>
+
+  <!-- ============ 2. ONE STATEMENT ============ -->
+  <section class="scene" data-i="1">
+    <div class="kicker">The plan</div>
+    <h1>Learn from the ones you know.</h1>
+    <p class="lede">One statement. Db2 reads the customers whose spend you already
+      have and <strong>learns the pattern in place</strong> — no export, no pipeline,
+      no second system.</p>
+    <div class="cols2">
+      <div>
+        <div class="waffle" id="waffle2"></div>
+        <div class="legend">
+          <span><i class="sw known"></i>Learning from these</span>
+          <span><i class="sw held"></i>Held back, untouched</span>
+        </div>
+      </div>
+      <div class="muted" style="max-width:44ch">
+        The held-back customers are kept out of training entirely. The model
+        never sees what they spent — which is what makes the check at the end
+        worth anything.
+      </div>
+    </div>
+    <button class="btn" id="train" style="margin-top:22px">Train the model</button>
+    <ul class="steps" id="steps"></ul>
+    <div id="trained-wrap" style="display:none"><div class="tag model">A trained model now lives inside Db2</div></div>
+    <div class="stats" id="trained" style="margin-top:8px"></div>
+    <details class="sql"><summary>Show the SQL</summary><pre id="sql-train"></pre></details>
+  </section>
+
+  <!-- ============ 3. WHAT IT LEARNED + SCORE ============ -->
+  <section class="scene" data-i="2">
+    <div class="kicker">What it learned</div>
+    <h1>What a customer is worth, in dollars</h1>
+    <div class="tag model">Learned by the trained model — not averages from your data</div>
+    <p class="lede">Every factor, measured against a <strong id="base">base</strong>
+      starting point. Blue adds to expected spend, red takes away.</p>
+    <div class="cols">
+      <div>
+        <div class="chart" id="drivers"></div>
+        <p class="muted" id="age-note" style="margin-top:18px;max-width:52ch"></p>
+      </div>
+      <div>
+        <div class="personas" id="personas"></div>
+        <div class="field"><label>Gender</label>
+          <select id="f-gender"><option value="M">Male</option><option value="F">Female</option></select></div>
+        <div class="field"><label>Age</label>
+          <input type="number" id="f-age" value="40" min="17" max="69"></div>
+        <div class="field"><label>Marital status</label><select id="f-marital"></select></div>
+        <div class="field"><label>Profession</label><select id="f-prof"></select></div>
+        <div class="result" style="margin-top:16px">
+          <div class="tag model" style="margin-bottom:6px">Predicted</div>
+          <div class="cap">Expected spend</div>
+          <div class="big" id="pred">—</div>
+          <div class="sub">scored by Db2, live</div>
+        </div>
+      </div>
+    </div>
+    <details class="sql"><summary>Show the SQL</summary><pre id="sql-predict"></pre></details>
+  </section>
+
+  <!-- ============ 4. THE REVEAL ============ -->
+  <section class="scene" data-i="3">
+    <div class="kicker">Was it right?</div>
+    <h1 id="trust-h">Typically within $10.</h1>
+    <p class="lede">Those held-back customers from the first screen? We did know
+      what they spent — we just never told the model. <strong>Here is what it
+      guessed, against the truth.</strong></p>
+
+    <div class="legend" style="margin-bottom:10px">
+      <span><i class="sw pred"></i>Model's prediction</span>
+      <span><i class="sw act"></i>What they actually spent</span>
+    </div>
+    <div class="dumb" id="reveal"></div>
+    <div class="tag model" style="margin-top:14px">Blue = the model’s answer · orange = the truth it was never shown</div>
+
+    <div class="stats" id="metrics" style="margin-top:26px"></div>
+    <details class="sql"><summary>Show the SQL</summary><pre id="sql-metrics"></pre></details>
+  </section>
+</div>
+
+<div class="nav"><div class="in">
+  <button class="btn ghost" id="back">← Back</button>
+  <div class="hint">← → arrow keys · <b id="pos">1</b> of 4</div>
+  <button class="btn" id="next">Next →</button>
+</div></div>
+
+<script>
+const N = 4;
+let i = 0, SQLTEXT = {}, MODEL = null;
+const $ = s => document.querySelector(s);
+const money = v => (v<0?"−$":"$") + Math.abs(v).toFixed(2);
+
+/* ---------- scenes ---------- */
+const rail = $("#rail");
+for (let k=0;k<N;k++){ const d=document.createElement("div"); rail.appendChild(d); }
+function show(n){
+  i = Math.max(0, Math.min(N-1, n));
+  document.querySelectorAll(".scene").forEach(s=>s.classList.toggle("on", +s.dataset.i===i));
+  [...rail.children].forEach((d,k)=>d.classList.toggle("on", k<=i));
+  $("#pos").textContent = i+1;
+  $("#back").style.visibility = i===0 ? "hidden" : "visible";
+  $("#next").style.visibility = i===N-1 ? "hidden" : "visible";
+  if (i===2) loadModel();
+  if (i===3) loadMetrics();
+  window.scrollTo({top:0});
+}
+$("#next").onclick = ()=>show(i+1);
+$("#back").onclick = ()=>show(i-1);
+addEventListener("keydown", e=>{
+  if (e.target.tagName==="SELECT"||e.target.tagName==="INPUT") return;
+  if (e.key==="ArrowRight") show(i+1);
+  if (e.key==="ArrowLeft") show(i-1);
+});
+
+/* ---------- sql highlighting ---------- */
+const KW = /\b(SELECT|FROM|WHERE|CALL|CREATE|TABLE|AS|WITH|DATA|ORGANIZE|BY|ROW|ORDER|COUNT|SUM|CASE|WHEN|THEN|ELSE|END|AVG|ABS|FETCH|FIRST|ROWS|ONLY|AND|NULL|IS)\b/g;
+function paint(el, sql){
+  el.innerHTML = sql
+    .replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))
+    .replace(/'[^']*'/g, m=>`<span class="str">${m}</span>`)
+    .replace(KW, m=>`<span class="kw">${m}</span>`)
+    .replace(/^(--.*)$/gm, m=>`<span class="cm">${m}</span>`);
+}
+
+/* ---------- scene 1 ---------- */
+async function boot(){
+  SQLTEXT = await (await fetch("/api/sql")).json();
+  paint($("#sql-overview"), SQLTEXT.overview + "\n\n" + SQLTEXT.sample);
+  paint($("#sql-train"), SQLTEXT.features + ";\n\n" + SQLTEXT.split + ";\n\n"
+        + SQLTEXT.impute + ";\n\n-- and the one that does the learning:\n" + SQLTEXT.train + ";");
+  paint($("#sql-predict"), SQLTEXT.model + ";\n\n" + SQLTEXT.predict + ";");
+  paint($("#sql-metrics"), SQLTEXT.metrics + ";");
+
+  const o = await (await fetch("/api/overview")).json();
+  const pct = Math.round(o.unknown / o.customers * 100);
+
+  $("#lede1").innerHTML =
+    `${o.customers.toLocaleString()} customers in Db2. `
+    + `<strong>${o.known.toLocaleString()}</strong> have bought from you. `
+    + `<strong>${o.unknown.toLocaleString()}</strong> have not — and those are the ones `
+    + `the sales team is about to spend its budget on.`;
+  $("#known-n").textContent = `${o.known.toLocaleString()} customers like these`;
+  $("#unknown-n").textContent = `${o.unknown.toLocaleString()} customers like these — this is what we want to find out`;
+
+  // one visual motif, three states: question -> learning -> reveal
+  const waffle = (el, unknownClass) => el.innerHTML =
+    Array.from({length:100}, (_,k)=>
+      `<i class="${k >= 100-pct ? unknownClass : ""}"></i>`).join("");
+  waffle($("#waffle1"), "u");
+  waffle($("#waffle2"), "h");
+
+  const head = `<tr><th>ID</th><th>Age</th><th>Profession</th><th>Spent</th></tr>`;
+  $("#sample").innerHTML = head + o.sample.map(r=>`<tr>
+      <td class="n">${r.id}</td>
+      <td class="${r.age==="—"?"gap":"n"}">${r.age}</td>
+      <td class="${r.profession==="—"?"gap":""}">${r.profession}</td>
+      <td class="n">$${r.spend.toFixed(2)}</td></tr>`).join("");
+  $("#pending").innerHTML = head + o.pending.map(r=>`<tr>
+      <td class="n">${r.id}</td>
+      <td class="${r.age==="—"?"gap":"n"}">${r.age}</td>
+      <td class="${r.profession==="—"?"gap":""}">${r.profession}</td>
+      <td class="unk">?</td></tr>`).join("");
+  $("#gaps").textContent =
+    `And it is real data, so it has holes — ${o.no_gender.toLocaleString()} customers have no gender `
+    + `on file and ${o.no_age.toLocaleString()} have no age. Db2 fills those in as part of the same run.`;
+
+  const st = await (await fetch("/api/state")).json();
+  if (st.trained) $("#train").textContent = "Train the model again";
+}
+
+/* ---------- scene 2 ---------- */
+$("#train").onclick = async ()=>{
+  const b = $("#train"); b.disabled = true; b.textContent = "Training…";
+  $("#steps").innerHTML = ""; $("#trained").innerHTML = "";
+  const r = await (await fetch("/api/train", {method:"POST"})).json();
+  if (!r.ok){ b.textContent = "Train the model"; b.disabled = false;
+              $("#steps").innerHTML = `<li class="in">Could not reach Db2</li>`; return; }
+  r.steps.forEach((s,k)=>setTimeout(()=>{
+    const li = document.createElement("li");
+    li.innerHTML = `<span><span class="tick">✓</span>${s.name}</span><b>${s.ms?s.ms+" ms":""}</b>`;
+    $("#steps").appendChild(li); requestAnimationFrame(()=>li.classList.add("in"));
+  }, k*260));
+  setTimeout(()=>{
+    $("#trained").innerHTML = `
+      <div class="stat"><b>${(r.train_ms/1000).toFixed(1)}s</b><span>to learn the pattern</span></div>
+      <div class="stat"><b>${r.train_rows.toLocaleString()}</b><span>customers learned from</span></div>
+      <div class="stat"><b>0</b><span>rows copied out of Db2</span></div>`;
+    b.textContent = "Train the model again"; b.disabled = false;
+    $("#trained-wrap").style.display = "block";
+  }, r.steps.length*260 + 200);
+};
+
+/* ---------- scene 3 ---------- */
+async function loadModel(){
+  if (MODEL) return;
+  const m = await (await fetch("/api/model")).json();
+  if (!m.ok) return;
+  MODEL = m;
+  $("#base").textContent = "$" + m.base.toFixed(2);
+
+  const shown = m.drivers.filter(d=>!d.per_unit);
+  const max = Math.max(...shown.map(d=>Math.abs(d.value)));
+  const lo = Math.min(...shown.map(d=>d.value)), hi = Math.max(...shown.map(d=>d.value));
+  $("#drivers").innerHTML = shown.map(d=>{
+    const w = (Math.abs(d.value)/max)*48;
+    return `<div class="lbl">${d.label}</div>
+      <div class="track"><div class="bar ${d.value>=0?"p":"n"}" style="width:${w}%"></div></div>
+      <div class="val ${d.value<0?"neg":""}">${money(d.value)}</div>`;
+  }).join("") +
+  `<div class="axis"><span>${money(lo)}</span><span>base</span><span>${money(hi)}</span></div>`;
+
+  const age = m.drivers.find(d=>d.per_unit);
+  if (age) $("#age-note").textContent =
+    `Age barely matters here — ${money(age.value)} per year, so a decade of age moves `
+    + `expected spend by about ${money(age.value*10)}. Who someone is outweighs how old they are.`;
+
+  const profs = m.drivers.filter(d=>d.group==="Profession").map(d=>d.label);
+  $("#f-marital").innerHTML = ["Married","Single","Unspecified"]
+      .map(v=>`<option value="${v}">${v}</option>`).join("");
+  $("#f-prof").innerHTML = profs.map(v=>`<option value="${v}">${v}</option>`).join("");
+  $("#f-prof").value = "Executive";
+
+  $("#personas").innerHTML = [
+    ["Executive, 40","M",40,"Married","Executive"],
+    ["Student, 20","F",20,"Single","Student"],
+    ["Retired, 62","F",62,"Married","Retired"],
+  ].map((p,k)=>`<button class="chip" data-k="${k}">${p[0]}</button>`).join("");
+  const P = [["","M",40,"Married","Executive"],["","F",20,"Single","Student"],["","F",62,"Married","Retired"]];
+  $("#personas").onclick = e=>{
+    const k = e.target.dataset.k; if (k===undefined) return;
+    const [,g,a,ms,pr] = P[k];
+    $("#f-gender").value=g; $("#f-age").value=a; $("#f-marital").value=ms; $("#f-prof").value=pr;
+    predict();
+  };
+  ["#f-gender","#f-age","#f-marital","#f-prof"].forEach(s=>$(s).onchange = predict);
+  predict();
+}
+let pending = null;
+async function predict(){
+  const body = {gender:$("#f-gender").value, age:+$("#f-age").value,
+                marital:$("#f-marital").value, profession:$("#f-prof").value};
+  const me = pending = Symbol();
+  const r = await (await fetch("/api/predict",{method:"POST",
+      headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)})).json();
+  if (me !== pending) return;
+  $("#pred").textContent = r.ok ? "$" + r.spend.toFixed(2) : "—";
+}
+
+/* ---------- scene 4 ---------- */
+async function loadMetrics(){
+  const m = await (await fetch("/api/metrics")).json();
+  if (m.ok){
+    $("#trust-h").textContent = `Typically within $${m.mae.toFixed(2)}.`;
+    $("#metrics").innerHTML = `
+      <div class="stat"><b>$${m.mae.toFixed(2)}</b><span>average miss per customer</span></div>
+      <div class="stat"><b>${m.accuracy.toFixed(1)}%</b><span>accurate on customers it never saw</span></div>
+      <div class="stat"><b>${m.tested.toLocaleString()}</b><span>held back and checked</span></div>`;
+  }
+  const r = await (await fetch("/api/reveal")).json();
+  if (!r.ok) return;
+  const all = r.rows.flatMap(x=>[x.predicted, x.actual]);
+  const lo = Math.floor(Math.min(...all)/10)*10, hi = Math.ceil(Math.max(...all)/10)*10;
+  const at = v => ((v-lo)/(hi-lo))*100;
+  $("#reveal").innerHTML = r.rows.map(x=>{
+    const a = at(Math.min(x.predicted,x.actual)), b = at(Math.max(x.predicted,x.actual));
+    return `<div class="who">#${x.id} · ${x.profession}</div>
+      <div class="row">
+        <div class="link" style="left:${a}%;width:${b-a}%"></div>
+        <div class="pt p" style="left:${at(x.predicted)}%" title="model said $${x.predicted}"></div>
+        <div class="pt a" style="left:${at(x.actual)}%" title="actually spent $${x.actual}"></div>
+      </div>
+      <div class="miss">off by $${x.miss.toFixed(2)}</div>`;
+  }).join("") + `<div class="scale"><span>$${lo}</span><span>$${hi}</span></div>`;
+}
+
+show(0); boot();
+</script>
+</body>
+</html>
