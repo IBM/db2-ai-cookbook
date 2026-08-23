@@ -1,6 +1,9 @@
 # Finding a similar product in another store's inventory
 
-> **Last checked 2026-07-29** — *partially* verified: the 500-shoe catalogue, the 1024-dim pre-computed vectors and `utils.py` all load; the search notebook itself was not executed end to end.  
+> **Last checked 2026-08-16** — verified against `SAMPLE`: the 500 pre-computed vectors import
+> into a `VECTOR(1024,FLOAT32)` column with 0 rejects, the cross-store `VECTOR_DISTANCE` query
+> returns ranked matches, and a live watsonx.ai embedding call comes back at 1024 dimensions.
+> The cells were exercised individually rather than as one top-to-bottom run.  
 > Checked on: Db2 12.1.5.0 · RHEL 10 · Python 3.12.
 
 [← Recommendation](../README.md) · [← Db2 AI Cookbook](../../README.md)
@@ -24,9 +27,12 @@ python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-cp .env.example .env        # then add your watsonx.ai API key and project ID
-jupyter lab 2-shoe-search.ipynb
+cp .env.example .env        # then fill in the Db2 and watsonx.ai values
 ```
+
+Then open `2-shoe-search.ipynb` and select `.venv/bin/python` as the kernel — in VS Code, through
+the kernel picker. To use JupyterLab instead, `pip install jupyterlab` first; it is not in
+`requirements.txt`, which pins only what the notebook itself imports.
 
 `shoes-vectors.csv` ships with the recipe, so the search notebook runs without spending
 watsonx.ai calls. Run `1-shoes-data-gen.ipynb` only if you want to regenerate the catalogue and
@@ -49,23 +55,28 @@ the text that got embedded, and the `VECTOR_DISTANCE` query that does the matchi
 
 ### The row becomes a sentence
 
-A shoe is a set of columns — brand, model, category, gender, size, colour. The notebook joins the
-descriptive ones into a single string and embeds that, which is what makes two shoes "similar":
+A shoe is a set of columns — brand, type, material, colour, weather resistance, arch support,
+size, price, store. The notebook joins **five** of them into one labelled string and embeds that,
+which is what makes two shoes "similar":
 
 ```
-brand + model + category + description  ──▶  watsonx.ai embedding  ──▶  VECTOR column
+TYPE: Running [SEP] MATERIAL: Knit [SEP] COLOR: Black [SEP] WEATHER_RESISTANCE: Waterproof [SEP] ARCH_SUPPORT: Flat
+                              │
+                              └──▶  watsonx.ai embedding  ──▶  VECTOR(1024,FLOAT32) column
 ```
 
-Choosing which attributes go into that string *is* the recommendation logic. Include colour and
-colour drives similarity; leave out size and size stops mattering — which is deliberate here,
-because size is a hard filter, not a similarity dimension.
+Choosing which attributes go into that string *is* the recommendation logic, and the omissions
+carry as much weight as the inclusions. `BRAND` is left out, so a Loopic can come back as the
+nearest match to a Zentrax — similarity is about the shoe, not the label. `SIZE` and `CITY` are
+left out because they are hard filters, not similarity dimensions; they belong in the `WHERE`
+clause.
 
 ### Similarity and availability are different questions
 
 ```sql
 … VECTOR_DISTANCE(<chosen shoe's vector>, EMBEDDING, EUCLIDEAN) AS DISTANCE
-FROM SHOES
-WHERE LOCATION = 'Toronto' AND SIZE = 12 AND GENDER = 'Men'
+FROM SQ_SHOES
+WHERE CITY = 'Toronto' AND SIZE = 12 AND CLASS = 'Men'
 ORDER BY DISTANCE
 ```
 
@@ -94,15 +105,28 @@ included.
 
 ### Credentials
 
-`.env` holds `WATSONX_APIKEY` and `WATSONX_PROJECT`; it is gitignored, and `.env.example` shows
-the shape. Db2 is reached as the local instance owner through the `%sql` magic provided by
-[`db2.ipynb`](https://github.com/IBM/db2-jupyter), which the notebook downloads on first run.
+`.env` holds two sets of values: the Db2 connection details and your watsonx.ai API key and
+project ID. It is gitignored, and `.env.example` shows the shape.
+
+Db2 is reached through the `%sql` magic provided by
+[`db2.ipynb`](https://github.com/IBM/db2-jupyter), which the notebook downloads on first run. That
+magic's `CONNECT CREDENTIALS` path builds a TCP/IP connection string and **has no local-catalog
+branch** — so it needs `database`, `hostname`, `port`, `uid` and `pwd` even when Db2 is on the same
+machine and you are the instance owner. Those five keys are lowercase in `.env`, because
+`dotenv_values()` passes them through verbatim.
+
+> **One thing to watch.** The magic caches these credentials to `db2connect.pickle` next to the
+> notebook, password in plaintext. The cookbook's root `.gitignore` covers `*.pickle` for exactly
+> that reason — an ignore rule naming only `.env` lets the copy through.
 
 ### Troubleshooting
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | `%sql` is not defined | `db2.ipynb` did not download | Fetch it from [IBM/db2-jupyter](https://github.com/IBM/db2-jupyter) into this folder |
+| `ModuleNotFoundError: nbformat` on `%run db2.ipynb` | IPython cannot run a notebook without it | `pip install -r requirements.txt` — it is pinned there |
+| `Connect requires a HOST, PORT, and DATABASE name` | `.env` has the watsonx keys but not the five lowercase Db2 ones | Add them; see *Credentials* above |
+| `SQL1013N ... could not be found` from a `! db2` cell | The notebook's hardcoded database name is not cataloged here | `db2 list db directory`, then edit the `connect to` in those cells |
 | `WATSONX_APIKEY` errors | `.env` missing or not loaded | `cp .env.example .env`, fill it in, restart the kernel |
 | `ModuleNotFoundError: utils` | Kernel started outside this folder | Open the notebook from the recipe directory |
 | Every result has the same distance | The chosen shoe's vector was compared against itself, or the embeddings never loaded | Check the table has as many rows as `shoes.csv` and that the vectors are non-zero |
@@ -117,5 +141,5 @@ utils.py                 helpers imported by the search notebook
 shoes.csv                the shoe catalogue and inventory
 shoes-vectors.csv        pre-computed embeddings, one per shoe
 requirements.txt         pinned
-.env.example             watsonx.ai credentials template
+.env.example             Db2 and watsonx.ai credentials template
 ```

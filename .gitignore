@@ -16,6 +16,11 @@
 .venv/
 venv/
 
+# Node dependencies — same reasoning, and larger. A recipe's own frontend/.gitignore
+# may also cover this; don't rely on it, because trimming that file would silently
+# make ~300 MB of node_modules committable.
+node_modules/
+
 # Python caches / build artifacts
 __pycache__/
 *.py[cod]
