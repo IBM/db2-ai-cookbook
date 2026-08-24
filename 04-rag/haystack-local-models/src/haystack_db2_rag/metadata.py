@@ -10,24 +10,22 @@ The filters are plain dicts, the same ones the retriever accepts, so anything sh
 can be handed to search.py to narrow a vector search (see --section and --tables-only).
 """
 
+from .chunks import body
 from .store import document_store
 
 store = document_store()
 
 
-def body(doc):
-    """The chunk's own text. Docling prepends the section headings to every chunk it
-    stores, so drop those lines to show what the chunk actually says."""
-    headings = doc.meta["headings"].split(" > ") if doc.meta["headings"] else []
-    lines = [line for line in doc.content.splitlines() if line.strip() and line not in headings]
-    return (lines[0] if lines else doc.content).strip()
+def preview(doc):
+    """The chunk's first line of actual text, for a one-line-per-hit listing."""
+    return body(doc).splitlines()[0]
 
 
 def show(label, documents):
     """Print a filter's hit count, and where each matched chunk sits in the document."""
     print(f"\n{label} — {len(documents)} chunks")
     for doc in documents[:4]:
-        print(f"  p.{doc.meta['page_start']:<3} {doc.meta['section'][:34]:34s} {body(doc)[:44]}")
+        print(f"  p.{doc.meta['page_start']:<3} {doc.meta['section'][:34]:34s} {preview(doc)[:44]}")
     if len(documents) > 4:
         print(f"  ... and {len(documents) - 4} more")
 

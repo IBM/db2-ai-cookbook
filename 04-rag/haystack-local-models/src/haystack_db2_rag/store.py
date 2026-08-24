@@ -1,4 +1,6 @@
-"""The Db2 vector store, shared by index.py and ask.py."""
+"""The Db2 vector store, shared by ingest.py, search.py and metadata.py."""
+
+from contextlib import contextmanager
 
 from haystack.utils import Secret
 from haystack_integrations.document_stores.ibm_db import IBMDb2DocumentStore
@@ -19,3 +21,20 @@ def document_store(recreate_table: bool = False) -> IBMDb2DocumentStore:
         distance_metric="COSINE",
         recreate_table=recreate_table,
     )
+
+
+@contextmanager
+def open_store(recreate_table: bool = False):
+    """A store that closes its Db2 connection when the block ends.
+
+    A short-lived script can skip this — the connection dies with the process. A long
+    running server cannot: every store holds a connection, and a run that raises leaves
+    its transaction open. The lock that transaction holds then blocks every reader of
+    the table until the process exits. So anything that opens a store inside a request
+    or a job closes it here, on the way out, error or not.
+    """
+    store = document_store(recreate_table=recreate_table)
+    try:
+        yield store
+    finally:
+        store.close()

@@ -58,6 +58,7 @@ watsonx.ai — see [Learn more](#learn-more) for that and the other references.
 - [Run the pipeline](#run-the-pipeline-ingest--search)
 - [Try it: example questions](#try-it-example-questions)
   - [More questions to try](#more-questions-to-try)
+- [Web UI: watch the pipelines run](#web-ui-watch-the-pipelines-run)
 - [How the PDF is chunked](#how-the-pdf-is-chunked-and-why-not-documentsplitter)
 - [Verify the vectors in Db2](#verify-the-vectors-in-db2)
 - [Metadata filtering: the other half of the table](#metadata-filtering-the-other-half-of-the-table)
@@ -336,6 +337,71 @@ Paris" in 5 of 6 runs.
 > **On reproducibility:** at `temperature: 0` the same question gives byte-identical answers, with
 > one exception — see [Deterministic generation](#deterministic-generation).
 
+## Web UI: watch the pipelines run
+
+The CLI prints the answer but hides the interesting part: you see a pause, then a result.
+`ui/` is a small local web app that shows each Haystack component as it runs — its real
+elapsed time, what it produced, and the code that built it.
+
+```bash
+.venv/bin/pip install -r ui/requirements.txt   # fastapi, uvicorn, python-multipart
+scripts/llama-servers.sh start                 # both servers must be up
+./ui/run.sh                                    # → http://127.0.0.1:8000
+```
+
+Two tabs:
+
+- **Ingestion** — upload a PDF and watch `DoclingConverter` → `OpenAIDocumentEmbedder` →
+  `DocumentWriter`. On this machine the converter alone is ~31 s of a ~35 s run, so the
+  card counts up while Docling works. When it finishes, a **What landed in Db2** panel
+  runs a plain `SELECT` and shows the first rows — `JSON_VALUE` pulling fields out of the
+  BSON in `META`, and `VECTOR_SERIALIZE` rendering the native `VECTOR(384, FLOAT32)` in
+  `EMBEDDING`. It is the "Verify the vectors in Db2" check below, run for you.
+- **Search** — ask a question and watch `OpenAITextEmbedder` → `IBMDb2EmbeddingRetriever`
+  → `ChatPromptBuilder` → `OpenAIChatGenerator`, then read the answer and the chunks it
+  was grounded in. The same four filters the CLI takes are form controls.
+
+Every step has a **Show code** disclosure holding that component's own
+`add_component(...)` call, with a short note underneath naming its arguments and what it
+takes in and hands on. Each tab also has a full-source toggle covering the
+`pipeline.connect()` wiring and, for search, the prompt template.
+
+### The code it shows is the code it ran
+
+The steps are not a hand-drawn diagram. `ui/api.py` calls `ingest_pdf()` and `ask()` —
+the same functions `python -m haystack_db2_rag.ingest` and `.search` call — and the step
+events come from Haystack's own tracing hook (`src/haystack_db2_rag/trace.py`), which
+receives a span per component from the real `Pipeline.run`.
+
+The one deliberate exception is the Db2 sample panel: `ui/sample_sql.py` holds the
+`SELECT` as a single constant that is both executed and displayed, so the SQL on screen
+is the SQL that ran. The short notes under each block are the only hand-written prose —
+they explain the code, they are not extracted from it.
+
+The snippets come from the same place. `ui/show_code.py` reads the module source with
+`inspect.getsource`, then cuts each step's block out of it by finding the matching
+`pipeline.add_component("<name>", ...)` call in the AST. Edit `search.py`, reload the
+page, and the shown code changes — nothing is copied or frozen.
+
+### Honesty about the UI
+
+- **It is single-user and unauthenticated.** It binds loopback by default. `HOST=0.0.0.0`
+  publishes it to your network, where anyone reaching it can replace your index.
+- **Ingesting replaces the index**, exactly as `ingest.py` does. The UI says what is
+  currently stored before you overwrite it. The drop happens when the writer first
+  connects, so a PDF that fails to convert leaves the previous index intact.
+- **The model servers are checked before a job starts.** This is not politeness:
+  `OpenAIDocumentEmbedder` does not raise when the embedding server is unreachable — it
+  logs each failed batch, retries with backoff, and passes on documents with no embedding,
+  so the run takes minutes to reach a confusing failure in the writer. The UI refuses in
+  35 ms with the command to fix it instead.
+- **Stores are closed after every job and request** (`open_store` in `store.py`). A script
+  can skip that — the connection dies with the process — but a server cannot: a run that
+  raises would otherwise leave its transaction open, and the lock it holds blocks every
+  reader of the table until you restart.
+- **No offline mode.** Unlike the demo in `03-hybrid-search/ui/`, there are no frozen
+  fixtures: both workflows are live against Db2 and the two llama.cpp servers.
+
 ## How the PDF is chunked (and why not DocumentSplitter)
 
 `DoclingConverter` runs with `ExportType.DOC_CHUNKS` and Docling's `HybridChunker`
@@ -547,13 +613,17 @@ src/haystack_db2_rag/   settings.py (all config, from .env) · store.py (the Db2
                         ingest.py    converter → embedder → writer
                         search.py    text_embedder → retriever → prompt_builder → generator
                         metadata.py  filtering on its own — no embeddings, no model servers
+                        chunks.py    body(doc) — a chunk's text without Docling's headings
+                        trace.py     per-component events, from Haystack's tracing hook
+ui/                     run.sh · api.py (FastAPI) · show_code.py · sample_sql.py · static/
 scripts/                llama-servers.sh  (start · stop · status for both llama.cpp servers)
 data/                   M-Lean_Article.pdf  (the sample document)
 docs/                   test-plan.md  (what to test, and why generation can't be asserted on)
 ```
 
-The code is deliberately minimal — no error handling, no retries, no edge cases — so each file
-reads top to bottom in one sitting.
+The five modules under `src/` are deliberately minimal — no error handling, no retries, no
+edge cases — so each file reads top to bottom in one sitting. `ui/` is additive: it imports
+those modules and adds nothing to the pipelines themselves.
 
 ## Learn more
 
