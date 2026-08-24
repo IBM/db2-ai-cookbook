@@ -1,0 +1,4 @@
+# Pinned: these versions resolve and import together (checked 2026-08-16).
+flask==3.1.3
+ibm_db==3.3.0          # bundles its own clidriver — no separate Db2 client install
+python-dotenv==1.2.3

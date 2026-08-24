@@ -3,6 +3,9 @@
     PYTHONPATH=src .venv/bin/python -m haystack_db2_rag.ingest data/M-Lean_Article.pdf
 
 The pipeline is three components:  converter -> embedder -> writer
+
+Importing this module is free: the pipeline is built inside build_pipeline(), so the
+web UI (ui/api.py) can call ingest_pdf() without a CLI run happening on import.
 """
 
 import sys
@@ -20,9 +23,7 @@ from haystack_integrations.components.converters.docling import (
 )
 
 from . import settings
-from .store import document_store
-
-pdf = sys.argv[1] if len(sys.argv) > 1 else "data/M-Lean_Article.pdf"
+from .store import open_store
 
 
 class SimpleMeta(BaseMetaExtractor):
@@ -55,38 +56,58 @@ class SimpleMeta(BaseMetaExtractor):
     def extract_dl_doc_meta(self, dl_doc):
         return {}
 
-# HybridChunker splits on the document's own structure (headings, tables) and packs
-# each chunk up to a token budget, measured with the embedding model's tokenizer.
-chunker = HybridChunker(
-    tokenizer=HuggingFaceTokenizer.from_pretrained(
-        settings.EMBED_TOKENIZER, max_tokens=settings.EMBED_MAX_TOKENS
+
+def build_pipeline(store) -> Pipeline:
+    """The three-component indexing pipeline:  converter -> embedder -> writer."""
+    # HybridChunker splits on the document's own structure (headings, tables) and packs
+    # each chunk up to a token budget, measured with the embedding model's tokenizer.
+    # Built here, not at import: from_pretrained() reads the tokenizer off disk.
+    chunker = HybridChunker(
+        tokenizer=HuggingFaceTokenizer.from_pretrained(
+            settings.EMBED_TOKENIZER, max_tokens=settings.EMBED_MAX_TOKENS
+        )
     )
-)
 
-# recreate_table=True gives a clean table every run, so this script is repeatable.
-store = document_store(recreate_table=True)
+    pipeline = Pipeline()
+    pipeline.add_component(
+        "converter",
+        DoclingConverter(
+            export_type=ExportType.DOC_CHUNKS, chunker=chunker, meta_extractor=SimpleMeta()
+        ),
+    )
+    pipeline.add_component(
+        "embedder",
+        OpenAIDocumentEmbedder(
+            api_key=Secret.from_token(settings.API_KEY),
+            model=settings.EMBED_MODEL,
+            api_base_url=settings.EMBED_BASE_URL,
+        ),
+    )
+    pipeline.add_component("writer", DocumentWriter(document_store=store))
 
-pipeline = Pipeline()
-pipeline.add_component(
-    "converter",
-    DoclingConverter(
-        export_type=ExportType.DOC_CHUNKS, chunker=chunker, meta_extractor=SimpleMeta()
-    ),
-)
-pipeline.add_component(
-    "embedder",
-    OpenAIDocumentEmbedder(
-        api_key=Secret.from_token(settings.API_KEY),
-        model=settings.EMBED_MODEL,
-        api_base_url=settings.EMBED_BASE_URL,
-    ),
-)
-pipeline.add_component("writer", DocumentWriter(document_store=store))
+    pipeline.connect("converter", "embedder")
+    pipeline.connect("embedder", "writer")
+    return pipeline
 
-pipeline.connect("converter", "embedder")
-pipeline.connect("embedder", "writer")
 
-print(f"Converting {pdf} (the first run downloads Docling's layout models)...")
-result = pipeline.run({"converter": {"sources": [pdf]}})
+def ingest_pdf(pdf: str, recreate_table: bool = True) -> dict:
+    """Run the pipeline over one PDF and report what was stored.
 
-print(f"Stored {result['writer']['documents_written']} chunks in {settings.DB2_TABLE}.")
+    recreate_table=True gives a clean table every run, so this is repeatable. The drop
+    happens when the writer first connects, not here — a PDF that fails to convert
+    therefore leaves the previous index untouched.
+    """
+    with open_store(recreate_table=recreate_table) as store:
+        result = build_pipeline(store).run({"converter": {"sources": [pdf]}})
+        return {
+            "documents_written": result["writer"]["documents_written"],
+            "table": settings.DB2_TABLE,
+            "source": pdf,
+        }
+
+
+if __name__ == "__main__":
+    pdf = sys.argv[1] if len(sys.argv) > 1 else "data/M-Lean_Article.pdf"
+    print(f"Converting {pdf} (the first run downloads Docling's layout models)...")
+    written = ingest_pdf(pdf)["documents_written"]
+    print(f"Stored {written} chunks in {settings.DB2_TABLE}.")

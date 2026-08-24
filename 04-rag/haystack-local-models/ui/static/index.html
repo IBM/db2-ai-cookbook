@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RAG on Db2 — Haystack + local models</title>
+  <link rel="stylesheet" href="styles.css?v=4" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">
+        <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
+          <defs>
+            <linearGradient id="brandg" x1="3" y1="4" x2="29" y2="28" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#E8552B" />
+              <stop offset=".5" stop-color="#0E8F8F" />
+              <stop offset="1" stop-color="#6D54D6" />
+            </linearGradient>
+          </defs>
+          <ellipse cx="16" cy="7.5" rx="10.5" ry="4" stroke="url(#brandg)" stroke-width="2" />
+          <path d="M5.5 7.5v17c0 2.2 4.7 4 10.5 4s10.5-1.8 10.5-4v-17"
+                stroke="url(#brandg)" stroke-width="2" stroke-linecap="round" />
+          <path d="M5.5 16c0 2.2 4.7 4 10.5 4s10.5-1.8 10.5-4"
+                stroke="url(#brandg)" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </span>
+      <div class="brand-text">
+        <h1>RAG on Db2</h1>
+        <p class="sub">Haystack pipelines, local models, one vector table — watch each component run.</p>
+      </div>
+    </div>
+    <div class="status" id="status" aria-live="polite">
+      <span class="dot-line"><span class="dot dot-idle"></span>connecting…</span>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="workflows">
+    <button class="tab" data-page="ingest" role="tab" aria-selected="true">Ingestion</button>
+    <button class="tab" data-page="search" role="tab" aria-selected="false">Search</button>
+  </nav>
+
+  <!-- ---------------------------------------------------------------- INGEST -->
+  <main class="page" id="page-ingest">
+    <div class="intro">
+      <h2>Ingestion pipeline</h2>
+      <p>A PDF becomes rows in a Db2 table with a <code>VECTOR(384, FLOAT32)</code> column.
+         Three Haystack components do it: <b>DoclingConverter</b> → <b>OpenAIDocumentEmbedder</b>
+         → <b>DocumentWriter</b>.</p>
+    </div>
+
+    <section class="card upload-card">
+      <label class="drop" id="drop" for="pdf">
+        <input type="file" id="pdf" accept="application/pdf,.pdf" hidden />
+        <span class="drop-icon" aria-hidden="true">＋</span>
+        <span class="drop-main" id="drop-main">Choose a PDF, or drop one here</span>
+        <span class="drop-sub">PDF only, up to 50&nbsp;MB</span>
+      </label>
+      <div class="upload-actions">
+        <p class="warn" id="replace-warn">
+          <b>Ingesting replaces the index.</b> <span id="replace-state">Checking what is stored…</span>
+        </p>
+        <button class="run" id="ingest-run" type="button" disabled>Ingest</button>
+      </div>
+    </section>
+
+    <div class="timeline" id="ingest-timeline"></div>
+    <p class="err" id="ingest-error" hidden></p>
+
+    <section class="card result" id="ingest-result" hidden>
+      <h3 id="ingest-result-head"></h3>
+      <p class="muted" id="ingest-result-sub"></p>
+    </section>
+
+    <section class="card sample" id="sample-card" hidden>
+      <h3>What landed in Db2</h3>
+      <p class="muted">The first rows of the table, read with plain SQL — no Haystack in the way.
+         <span id="sample-total"></span></p>
+      <div id="sample-sql"></div>
+      <div id="sample-note"></div>
+      <div class="table-scroll"><table id="sample-rows"></table></div>
+    </section>
+
+    <details class="fullsrc" data-code="ingest">
+      <summary>Show full source of <code>src/haystack_db2_rag/ingest.py</code></summary>
+      <div class="fullsrc-body"></div>
+    </details>
+  </main>
+
+  <!-- ---------------------------------------------------------------- SEARCH -->
+  <main class="page" id="page-search" hidden>
+    <div class="intro">
+      <h2>Search pipeline</h2>
+      <p>A question becomes a 384-dimension vector, Db2 ranks the stored chunks by cosine
+         distance, and the top matches are pasted into a prompt for the local chat model.
+         Four components: <b>OpenAITextEmbedder</b> → <b>IBMDb2EmbeddingRetriever</b> →
+         <b>ChatPromptBuilder</b> → <b>OpenAIChatGenerator</b>.</p>
+    </div>
+
+    <section class="card ask-card">
+      <div class="ask-row">
+        <input id="question" type="text" autocomplete="off" spellcheck="false"
+               placeholder="Ask something about the ingested document…"
+               aria-label="your question" />
+        <button class="run" id="search-run" type="button">Ask</button>
+      </div>
+      <div class="filters">
+        <span class="filters-label">Filters
+          <span class="hint">applied in Db2 <em>before</em> the vector search</span>
+        </span>
+        <label>Top&nbsp;k <input type="number" id="f-topk" min="1" max="10" value="3" /></label>
+        <label>Page <input type="number" id="f-page" min="1" placeholder="any" /></label>
+        <label>Section <select id="f-section"><option value="">any</option></select></label>
+        <label class="check"><input type="checkbox" id="f-tables" /> Tables only</label>
+      </div>
+    </section>
+
+    <div class="timeline" id="search-timeline"></div>
+    <p class="err" id="search-error" hidden></p>
+
+    <section class="card answer" id="answer-card" hidden>
+      <h3>Answer</h3>
+      <p class="answer-text" id="answer-text"></p>
+    </section>
+
+    <section id="chunks" hidden>
+      <h3 class="chunks-head">Grounded in <span id="chunks-count"></span>
+        <span class="hint">cosine distance — lower is closer</span></h3>
+      <div id="chunks-list"></div>
+    </section>
+
+    <details class="fullsrc" data-code="search" data-prompt="1">
+      <summary>Show full source of <code>src/haystack_db2_rag/search.py</code></summary>
+      <div class="fullsrc-body"></div>
+    </details>
+  </main>
+
+  <script src="pycode.js?v=4"></script>
+  <script src="app.js?v=4"></script>
+  <script src="ingest.js?v=4"></script>
+  <script src="search.js?v=4"></script>
+</body>
+</html>

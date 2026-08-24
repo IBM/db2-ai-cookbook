@@ -1,0 +1,5 @@
+# The web UI only. Install these on top of the recipe's requirements.txt:
+#   .venv/bin/pip install -r ui/requirements.txt
+fastapi==0.115.6
+uvicorn==0.34.0
+python-multipart==0.0.20   # FastAPI needs this to accept the uploaded PDF (UploadFile)

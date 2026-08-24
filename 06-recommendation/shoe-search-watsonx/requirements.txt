@@ -4,6 +4,7 @@ ibm_db==3.2.9          # required by db2.ipynb, which provides the %sql magic
 ibm_watsonx_ai==1.6.0
 ipykernel==7.3.0
 matplotlib==3.11.1
+nbformat==5.11.0       # required by `%run db2.ipynb` — IPython cannot run a notebook without it
 numpy==2.5.1
 pandas==2.3.3
 python-dotenv==1.2.2
