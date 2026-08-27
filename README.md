@@ -7,9 +7,10 @@
 ![Status](https://img.shields.io/badge/purpose-learning%20%2F%20reference-success)
 
 > **Db2 12.1+.** The exact level each module needs is in the **Needs** column below. Most run on
-> **12.1.2**, where the native `VECTOR` type and `VECTOR_DISTANCE` arrive; only
-> [03-hybrid-search](03-hybrid-search/) requires **12.1.5**, for Db2 Text Search and in-database
-> `TO_EMBEDDING`. Check yours with `db2level`.
+> **12.1.2**, where the native `VECTOR` type and `VECTOR_DISTANCE` arrive;
+> [03-hybrid-search](03-hybrid-search/) and
+> [08-language-model-integration](08-language-model-integration/) require **12.1.5**, for Db2 Text
+> Search and in-database `TO_EMBEDDING`. Check yours with `db2level`.
 
 The cookbook is organised in two levels:
 
@@ -39,6 +40,7 @@ Pick a module, pick a recipe inside it, follow the Quick start.
 | [05-agentic-rag](05-agentic-rag/) | RAG that checks its own work. A LangGraph agent grades the documents it retrieved, and when they don't answer the question it rewrites the query and retries rather than answering from bad context. Shows the pipeline twice — once as a notebook prototype, then split into three FastAPI microservices behind a gateway, which is the step most RAG tutorials skip. | **Db2 12.1.2+** · Python + local embeddings + watsonx.ai | 1 |
 | [06-recommendation](06-recommendation/) | Item-to-item recommendation: "find me something like this one — that I can actually get". Product attributes become a vector, `VECTOR_DISTANCE` ranks the catalogue, and store, size and stock filter it in the same statement — because a recommendation nobody can buy is worthless. | **Db2 12.1.2+** · Python + watsonx.ai · Flask + React | 2 |
 | [07-in-database-ml](07-in-database-ml/) | Classical supervised learning, in SQL. Db2's IDAX stored procedures split a table, fill its gaps, fit a regression model and measure it — every step a `CALL`, with the data never leaving the database. Predicts what a customer will spend from attributes you already hold. A branch rather than a next step: it assumes nothing from the modules before it. | **Db2 12.1 + IDAX enabled** · SQL only, or Python for the walkthrough | 1 |
+| [08-language-model-integration](08-language-model-integration/) | Call an embedding or text-generation model straight from SQL. `CREATE EXTERNAL MODEL` registers an OpenAI-compatible endpoint as a catalogue object, and `TO_EMBEDDING` / `TEXT_GENERATION` invoke it mid-statement, so `UPDATE … SET embedding = TO_EMBEDDING(col USING M)` embeds a whole table with no application in the loop. The same DDL reaches a llama.cpp process on localhost and a hosted API, differing only in URL, model id, width and key. A branch rather than a next step, and the mechanism 03-hybrid-search uses for its semantic leg. | **Db2 12.1.5** · SQL only; on-prem half needs no credentials | 1 |
 
 More modules are on the way. See [Adding a module](#adding-a-module) below.
 
@@ -63,7 +65,7 @@ Recipes that persist vectors need **Db2 12.1.2 or later** — that is where the 
 
 One module asks for less: [01-tabular-search](01-tabular-search/) is SQL only — no Python, no virtualenv, no models — and its table ships with the `SAMPLE` database on Db2 12.1.2+, so it needs no setup at all.
 
-One module asks for more: [03-hybrid-search](03-hybrid-search/) needs **Db2 12.1.5** plus OpenSearch, because it uses Db2 Text Search and in-database `TO_EMBEDDING` rather than just the `VECTOR` type.
+Two modules ask for more, both needing **Db2 12.1.5** rather than 12.1.2: [03-hybrid-search](03-hybrid-search/) also needs OpenSearch, because it uses Db2 Text Search alongside in-database `TO_EMBEDDING`; [08-language-model-integration](08-language-model-integration/) needs only an OpenAI-compatible endpoint, since `CREATE EXTERNAL MODEL` and the in-database inference functions land in 12.1.5.
 
 One module asks for something different: [07-in-database-ml](07-in-database-ml/) uses no vectors at all. It needs the IDAX stored procedures enabled and its own **16K page-size** database rather than `SAMPLE` — a few minutes of one-time setup, spelled out in the recipe.
 
@@ -101,6 +103,9 @@ db2-ai-cookbook/
 │   └── README.md
 ├── 07-in-database-ml/            # train a regression model inside Db2, in SQL
 │   ├── gosales-linear-regression/
+│   └── README.md
+├── 08-language-model-integration/ # register a model, call it from SQL
+│   ├── sql-local-and-cloud-models/
 │   └── README.md
 ├── LICENSE
 └── README.md                     # you are here
