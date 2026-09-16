@@ -1,5 +1,5 @@
 # The web UI only. Install these on top of the recipe's requirements.txt:
 #   .venv/bin/pip install -r ui/requirements.txt
-fastapi==0.115.6
-uvicorn==0.34.0
-python-multipart==0.0.20   # FastAPI needs this to accept the uploaded PDF (UploadFile)
+fastapi==0.141.1           # 0.115.x pulled starlette 0.41.x (CVE-2025-62727)
+uvicorn==0.52.0
+python-multipart==0.0.31   # FastAPI needs this to accept the uploaded PDF (UploadFile)
