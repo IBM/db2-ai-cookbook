@@ -2,13 +2,13 @@
 # LangChain ecosystem - pinned to working versions
 langchain==0.3.27
 langchain-community==0.3.27
-langchain-core==0.3.72
+langchain-core==0.3.85       # security: highest 0.3.x; CVE-2025-68664 fixed in 0.3.81. langchain 0.3.27 caps langchain-core <1.0.0
 langchain-db2==0.1.6
 langchain-text-splitters==0.3.9
 langchain-ibm==0.3.15
 ibm_watsonx_ai==1.6.0        # imported directly by rag-basic.ipynb
 pydantic==2.13.4             # imported directly by rag-basic.ipynb
-langgraph==1.0.1
+langgraph==1.0.1             # GHSA-g48c-2wqr-h844 needs langgraph>=1.0.10, which requires langchain-core>=1.0 — blocked by the cap above
 
 # LLM and embeddings - pinned to working version
 llama-cpp-python==0.3.14
