@@ -1,14 +1,17 @@
-# Pinned to versions that install together (verified 2026-07-29).
+# Pinned to versions that install together (LangChain 1.x, 2026-09-16).
+# The 0.3.x line is end-of-life and never received the langchain-core path-traversal
+# fix (CVE-2026-34070), so this recipe now tracks LangChain 1.x. Versions match the
+# set already locked by 05-agentic-rag/langgraph-local-models.
 # LangChain ecosystem - pinned to working versions
-langchain==0.3.27
-langchain-community==0.3.27
-langchain-core==0.3.85       # security: highest 0.3.x; CVE-2025-68664 fixed in 0.3.81. langchain 0.3.27 caps langchain-core <1.0.0
-langchain-db2==0.1.6
-langchain-text-splitters==0.3.9
-langchain-ibm==0.3.15
+langchain-classic==1.0.8     # RetrievalQA and the other legacy chains moved here in 1.x
+langchain-community==0.4.2
+langchain-core==1.6.3
+langchain-db2==1.0.0
+langchain-text-splitters==1.1.2
+langchain-ibm==1.1.0
 ibm_watsonx_ai==1.6.0        # imported directly by rag-basic.ipynb
 pydantic==2.13.4             # imported directly by rag-basic.ipynb
-langgraph==1.0.1             # GHSA-g48c-2wqr-h844 needs langgraph>=1.0.10, which requires langchain-core>=1.0 — blocked by the cap above
+langgraph==1.2.11
 
 # LLM and embeddings - pinned to working version
 llama-cpp-python==0.3.14
