@@ -15,3 +15,18 @@ optimum==1.27.0       # optimum>=2.0 removed optimum.bettertransformer, which in
 transformers==4.48.3  # optimum.bettertransformer refuses to load on transformers>=4.49
 tokenizers==0.21.4    # required by transformers 4.48.x (needs tokenizers<0.22)
 click==8.1.8          # typer 0.12.5 raises "Secondary flag is not valid for non-boolean flag" on click>=8.2
+
+# Known unpatchable advisories in this recipe, all dead-ending at infinity-emb 0.0.77
+# (still the latest release, so there is nothing upstream to bump to):
+#
+#   transformers 4.48.3 - patched in 5.10.0, unreachable. infinity imports
+#       optimum.bettertransformer unconditionally, that module only exists in
+#       optimum<2.0, and it refuses to load on transformers>=4.49. Reaching the
+#       fix means dropping infinity-emb, not bumping a pin.
+#   click 8.1.8 - patched in 8.3.3, unreachable. infinity-emb declares
+#       typer<0.13.0, and typer 0.12.x breaks on click>=8.2.
+#
+# Both are reachable only by a caller who can choose the model or config this
+# service loads; the service loads one fixed local model. Re-check whenever
+# infinity-emb publishes past 0.0.77 - a release that drops bettertransformer
+# or raises the typer cap clears both at once.
